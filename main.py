@@ -39,5 +39,14 @@ def display_image(img):
     st.image(image, caption='Load')
     # st.sidebar.image(image, caption='Load')
 
+def face_detection_mtcnn(img):
+    filename = img
+    pixels = pyplot.imread(filename)
+    detector = MTCNN()
+    faces = detector.detect_faces(pixels)
+    for face in faces:
+        print(face)
+
+
 if __name__ == '__main__':
     set_up_gui()
