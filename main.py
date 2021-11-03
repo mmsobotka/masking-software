@@ -5,6 +5,7 @@ from matplotlib import pyplot
 from mtcnn.mtcnn import MTCNN
 import cv2 as cv
 from matplotlib.patches import Rectangle
+from matplotlib.patches import Circle
 
 
 INPUT_FILE = None
@@ -34,6 +35,7 @@ def set_up_gui():
     else:
         pass
 
+
     if st.sidebar.button('Save plot with face detection'):
             pixels = pyplot.imread(INPUT_FILE)
             decetor = MTCNN()
@@ -41,6 +43,7 @@ def set_up_gui():
             draw_plot_with_boxes(INPUT_FILE, faces)
     else:
         pass
+
 
 def reload_image(img):
     image_location = st.empty()
@@ -64,7 +67,10 @@ def draw_image_with_boxes(filename, faces):
     for face in faces:
         x, y, width, height = face['box']
         cv.rectangle(imageRGB, (x, y), (x+width, y+height), (255, 0, 0), 2)
+        for key, value in face['keypoints'].items():
+            cv.circle(imageRGB, value, 2, (255, 0, 0), 3)
     reload_image(imageRGB)
+
 
 def draw_plot_with_boxes(filename, result_list):
     data = pyplot.imread(filename)
@@ -74,6 +80,9 @@ def draw_plot_with_boxes(filename, result_list):
         x, y, width, height = result['box']
         box = Rectangle((x, y), width, height, fill=False, color='red')
         ax.add_patch(box)
+        for key, value in result['keypoints'].items():
+            dot = Circle(value, radius=2, color='red')
+            ax.add_patch(dot)
     pyplot.savefig("image.png")
 
 if __name__ == '__main__':
