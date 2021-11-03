@@ -33,6 +33,7 @@ def set_up_gui():
             face_detection_mtcnn(INPUT_FILE)
     else:
         pass
+
     if st.sidebar.button('Save plot with face detection'):
             pixels = pyplot.imread(INPUT_FILE)
             decetor = MTCNN()
@@ -41,10 +42,15 @@ def set_up_gui():
     else:
         pass
 
+def reload_image(img):
+    image_location = st.empty()
+    image_location.image(img)
+
 def display_image(img):
     image = Image.open(img)
-    st.image(image, caption='Load')
-    # st.sidebar.image(image, caption='Load')
+    # st.image(image, caption='Load')
+    # reload_image(image)
+    st.sidebar.image(image)
 
 def face_detection_mtcnn(img):
     pixels = pyplot.imread(img)
@@ -55,11 +61,10 @@ def face_detection_mtcnn(img):
 def draw_image_with_boxes(filename, faces):
     img = cv.imread(filename.name)
     imageRGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
-
     for face in faces:
         x, y, width, height = face['box']
         cv.rectangle(imageRGB, (x, y), (x+width, y+height), (255, 0, 0), 2)
-    st.image(imageRGB, caption='Load')
+    reload_image(imageRGB)
 
 def draw_plot_with_boxes(filename, result_list):
     data = pyplot.imread(filename)
