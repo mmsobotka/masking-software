@@ -47,6 +47,8 @@ def face_detection_mtcnn(img):
     for face in faces:
         print(face)
 
+    x, y, width, height = face['box']
+    rect = Rectangle((x, y), width, height, fill=False, color='red')
 
 if __name__ == '__main__':
     set_up_gui()
