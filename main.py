@@ -3,7 +3,6 @@ import streamlit as st
 import tempfile
 from matplotlib import pyplot
 from mtcnn.mtcnn import MTCNN
-import numpy as np
 import cv2
 from matplotlib.patches import Rectangle
 from matplotlib.patches import Circle
@@ -40,6 +39,13 @@ def set_up_gui():
             UNKNOWN_IMAGE = temp_img
             display_image(temp_img)
 
+    if program_mode == UPLOAD_VIDEO:
+        uploaded_vid = st.sidebar.file_uploader("Please select video to upload", type=['mp4', 'mov'])
+
+        if uploaded_vid is not None:
+            temp_vid = tempfile.NamedTemporaryFile(delete=False)
+            temp_vid.write(uploaded_vid.read())
+            display_video(temp_vid)
 
     if program_mode == LIVE_CAMERA:
         st.title("Live Camera")
@@ -112,6 +118,19 @@ def display_image(img):
     # st.image(image, caption='Load')
     # reload_image(image)
     st.sidebar.image(image)
+
+
+def display_video(vid):
+    vf = cv2.VideoCapture(vid.name)
+    stframe = st.empty()
+
+    while vf.isOpened():
+        ret, frame = vf.read()
+        if not ret:
+            print("Can't receive frame - stream end.")
+            break
+        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        stframe.image(rgb)
 
 
 def face_detection_mtcnn(img, face_distance=None, person_name=None):
