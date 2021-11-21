@@ -10,6 +10,11 @@ class ModeSelector:
 
     sidebar_options = [upload_default, upload_image, upload_video, upload_live_camera]
 
+    default = "No mask"
+    gaussian_filter = "Gaussian filter"
+    extract_face_features = "Extract face features"
+    face_transform = "Face transform"
+
     @staticmethod
     def load_detection_mode():
         points_color = None
@@ -40,10 +45,7 @@ class ModeSelector:
 
     @staticmethod
     def load_mask_mode():
-        gaussian_filter = "Gaussian filter"
-        extract_face_features = "Extract face features"
-        face_transform = "Face transform"
-        masking_sidebar_options = [gaussian_filter, extract_face_features, face_transform]
+        masking_sidebar_options = [ModeSelector.default, ModeSelector.gaussian_filter, ModeSelector.extract_face_features, ModeSelector.face_transform]
         mask_mode = st.sidebar.selectbox("Set masking method as:", masking_sidebar_options)
         return mask_mode
 
@@ -54,5 +56,8 @@ class ModeSelector:
 
     @staticmethod
     def load_face_detector_check_box():
-        return st.sidebar.checkbox("Enable face detection")
+        return st.sidebar.checkbox("Face detection")
 
+    @staticmethod
+    def load_box_on_face_check_box():
+        return st.sidebar.checkbox("Draw box")

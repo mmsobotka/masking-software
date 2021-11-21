@@ -23,7 +23,7 @@ class Display:
 
     @staticmethod
     def get_slider_size(key):
-        size = st.sidebar.slider("Select size", 0.1, 10.0, 2.0, key=key)
+        size = st.sidebar.slider("Select size", 1.0, 8.0, 1.0, key=key)
         return size
 
     @staticmethod
@@ -61,15 +61,14 @@ class Display:
 
     @staticmethod
     def draw_mesh_on_faces(image_loaded, image_to_draw_on, color, size):
+        """ TODO improve small faces on images"""
         image = cv2.imread(image_loaded.name)
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         mp_draw = mp.solutions.drawing_utils
         draw_spec = mp_draw.DrawingSpec(thickness=int(size), circle_radius=int(size), color=color)
         mp_face_mesh = mp.solutions.face_mesh
         face_mesh = mp_face_mesh.FaceMesh(max_num_faces=10)
-
-        # imageRGB = cv.cvtColor(image, cv.COLOR_BGR2RGB)
-        results = face_mesh.process(image)
+        results = face_mesh.process(image_rgb)
 
         if results.multi_face_landmarks:
             for faceLms in results.multi_face_landmarks:

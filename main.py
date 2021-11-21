@@ -185,17 +185,23 @@ class MyClass:
         blur = cv2.blur(face, (42, 42))
         img[y:y + height, x:x + width] = blur
 
+
+
     def detect_eyes(self, img):
         face_landmark_list = face_recognition.face_landmarks(img)
         for face_landmarks in face_landmark_list:
+            print(face_landmarks)
             right_eye = []
             left_eye = []
 
             for i in range(6):
                 point_re = list(face_landmarks["right_eye"][i])
+                print(point_re)
                 right_eye.append(point_re)
                 point_le = list(face_landmarks['left_eye'][i])
                 left_eye.append(point_le)
+
+            print(right_eye)
 
             cv2.fillPoly(img, [np.array([right_eye], np.int32)], (0, 0, 0))
             cv2.fillPoly(img, [np.array([left_eye], np.int32)], (0, 0, 0))
@@ -232,7 +238,7 @@ class MyClass:
 
             if self.MASK:
                 #self.simple_mask(imageRGB, face['box'])
-                #self.detect_eyes(imageRGB)
+                self.detect_eyes(imageRGB)
                 #self.detect_lips(imageRGB)
                 self.FACE_IMAGE_MASKED = imageRGB.copy()
 
@@ -360,6 +366,5 @@ if __name__ == '__main__':
 
     application = Application()
     """---"""
-
     application.load_interface()
 
