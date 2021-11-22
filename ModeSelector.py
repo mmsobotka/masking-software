@@ -12,7 +12,7 @@ class ModeSelector:
 
     default = "No mask"
     gaussian_filter = "Gaussian filter"
-    extract_face_features = "Extract face features"
+    extract_face_features = "Cut face features"
     face_transform = "Face transform"
     extract_face_features_interpolation = "Extract face features interpolation"
 
@@ -46,11 +46,16 @@ class ModeSelector:
 
     @staticmethod
     def load_mask_mode():
+        filtration_size = None
         masking_sidebar_options = [ModeSelector.default, ModeSelector.gaussian_filter,
                                    ModeSelector.extract_face_features, ModeSelector.face_transform,
                                    ModeSelector.extract_face_features_interpolation]
         mask_mode = st.sidebar.selectbox("Set masking method as:", masking_sidebar_options)
-        return mask_mode
+        if mask_mode == ModeSelector.gaussian_filter:
+            filtration_size = Display.get_slider_size("size", max=60.0)
+        if mask_mode == ModeSelector.extract_face_features_interpolation:
+            filtration_size = Display.get_slider_size("size", max=30.0)
+        return mask_mode, filtration_size
 
     @staticmethod
     def load_inerpolation_mode():

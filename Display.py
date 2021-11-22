@@ -22,8 +22,8 @@ class Display:
         return ImageColor.getcolor(color, "RGB")
 
     @staticmethod
-    def get_slider_size(key):
-        size = st.sidebar.slider("Select size", 1.0, 8.0, 1.0, key=key)
+    def get_slider_size(key, max=8.0):
+        size = st.sidebar.slider("Select size", 1.0, max, 1.0, key=key)
         return size
 
     @staticmethod

@@ -17,6 +17,7 @@ class Application:
     detection_mode_colors = None
     detection_mode_sizes = None
     masking_mode = None
+    masking_size = None
     is_face_detection_enabled = None
 
     image_after_masking = None
@@ -63,8 +64,9 @@ class Application:
             self.detection_mode_sizes) = ModeSelector.load_detection_mode()
 
     def load_masking_mode(self):
-        mask_mode = ModeSelector.load_mask_mode()
+        mask_mode, size = ModeSelector.load_mask_mode()
         self.masking_mode = mask_mode
+        self.masking_size = size
 
     def enable_face_detection(self):
         is_face_detection_enabled = ModeSelector.load_face_detector_check_box()
@@ -94,12 +96,16 @@ class Application:
         if self.masking_mode == ModeSelector.default:
             pass
         elif self.masking_mode == ModeSelector.gaussian_filter:
-            #FaceFilter.run_face_gausian_filter(self.faces, self.image_after_masking)
-            self.image_after_masking = FaceFilter.run_face_gausian_filter(self.image_loaded, self.image_after_masking, FaceFilter.face_without_forehead_chin_indices)
-
+            # FaceFilter.run_face_gausian_filter(self.faces, self.image_after_masking)
+            self.image_after_masking = FaceFilter.run_face_gausian_filter(self.image_loaded, self.image_after_masking,
+                                                                          self.masking_size,
+                                                                          FaceFilter.face_without_forehead_chin_indices)
 
         elif self.masking_mode == ModeSelector.extract_face_features:
-            pass
+            self.image_after_masking = FaceFilter.run_face_cut_features(self.image_loaded, self.image_after_masking,
+                                                                        FaceFilter.left_eye_indices)
+            self.image_after_masking = FaceFilter.run_face_cut_features(self.image_loaded, self.image_after_masking,
+                                                                        FaceFilter.right_eye_indices)
         elif self.masking_mode == ModeSelector.face_transform:
             pass
         elif self.masking_mode == ModeSelector.extract_face_features_interpolation:
@@ -114,19 +120,23 @@ class Application:
             self.image_after_masking = FaceFilter.run_face_filter_face_features_extraction_interpolation(
                 self.image_loaded,
                 self.image_after_masking,
+                self.masking_size,
                 FaceFilter.right_eye_indices)
         if left_eye:
             self.image_after_masking = FaceFilter.run_face_filter_face_features_extraction_interpolation(
                 self.image_loaded,
                 self.image_after_masking,
+                self.masking_size,
                 FaceFilter.left_eye_indices)
         if nose:
             self.image_after_masking = FaceFilter.run_face_filter_face_features_extraction_interpolation(
                 self.image_loaded,
                 self.image_after_masking,
+                self.masking_size,
                 FaceFilter.nose_indices)
         if mouth:
             self.image_after_masking = FaceFilter.run_face_filter_face_features_extraction_interpolation(
                 self.image_loaded,
                 self.image_after_masking,
+                self.masking_size,
                 FaceFilter.mouth_indices)
