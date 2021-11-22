@@ -14,6 +14,7 @@ class ModeSelector:
     gaussian_filter = "Gaussian filter"
     extract_face_features = "Extract face features"
     face_transform = "Face transform"
+    extract_face_features_interpolation = "Extract face features interpolation"
 
     @staticmethod
     def load_detection_mode():
@@ -45,9 +46,20 @@ class ModeSelector:
 
     @staticmethod
     def load_mask_mode():
-        masking_sidebar_options = [ModeSelector.default, ModeSelector.gaussian_filter, ModeSelector.extract_face_features, ModeSelector.face_transform]
+        masking_sidebar_options = [ModeSelector.default, ModeSelector.gaussian_filter,
+                                   ModeSelector.extract_face_features, ModeSelector.face_transform,
+                                   ModeSelector.extract_face_features_interpolation]
         mask_mode = st.sidebar.selectbox("Set masking method as:", masking_sidebar_options)
         return mask_mode
+
+    @staticmethod
+    def load_inerpolation_mode():
+        right_eye = st.sidebar.checkbox("right_eye")
+        left_eye = st.sidebar.checkbox("left eye")
+        nose = st.sidebar.checkbox("nose")
+        mouth = st.sidebar.checkbox("mouth")
+
+        return right_eye, left_eye, nose, mouth
 
     @staticmethod
     def load_program_mode():

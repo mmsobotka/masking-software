@@ -1,5 +1,6 @@
 import streamlit as st
 
+import FaceFilter
 from Information import *
 from ModeSelector import *
 from Display import *
@@ -44,7 +45,6 @@ class Application:
                 self.load_masking_mode()
                 self.detect_faces()
                 self.run_masking_mode()
-                self.image_after_masking = FaceFilter.cp(self.image_loaded, self.image_after_masking)
                 self.draw_on_image()
 
             Display.view_image(self.image_after_masking)
@@ -94,11 +94,39 @@ class Application:
         if self.masking_mode == ModeSelector.default:
             pass
         elif self.masking_mode == ModeSelector.gaussian_filter:
-            FaceFilter.run_face_gausian_filter(self.faces, self.image_after_masking)
+            #FaceFilter.run_face_gausian_filter(self.faces, self.image_after_masking)
+            self.image_after_masking = FaceFilter.run_face_gausian_filter(self.image_loaded, self.image_after_masking, FaceFilter.face_without_forehead_chin_indices)
+
+
         elif self.masking_mode == ModeSelector.extract_face_features:
             pass
         elif self.masking_mode == ModeSelector.face_transform:
             pass
+        elif self.masking_mode == ModeSelector.extract_face_features_interpolation:
+            inerpolation_mode = ModeSelector.load_inerpolation_mode()
+            self.run_interpolation_mode(inerpolation_mode)
+            # self.image_after_masking = FaceFilter.run_face_filter_face_features_extraction_interpolation(
+            #   self.image_loaded, self.image_after_masking, )
 
-
-
+    def run_interpolation_mode(self, inerpolation_mode):
+        right_eye, left_eye, nose, mouth = inerpolation_mode
+        if right_eye:
+            self.image_after_masking = FaceFilter.run_face_filter_face_features_extraction_interpolation(
+                self.image_loaded,
+                self.image_after_masking,
+                FaceFilter.right_eye_indices)
+        if left_eye:
+            self.image_after_masking = FaceFilter.run_face_filter_face_features_extraction_interpolation(
+                self.image_loaded,
+                self.image_after_masking,
+                FaceFilter.left_eye_indices)
+        if nose:
+            self.image_after_masking = FaceFilter.run_face_filter_face_features_extraction_interpolation(
+                self.image_loaded,
+                self.image_after_masking,
+                FaceFilter.nose_indices)
+        if mouth:
+            self.image_after_masking = FaceFilter.run_face_filter_face_features_extraction_interpolation(
+                self.image_loaded,
+                self.image_after_masking,
+                FaceFilter.mouth_indices)
