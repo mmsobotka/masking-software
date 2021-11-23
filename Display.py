@@ -79,7 +79,7 @@ class Display:
         return np.array(pil_image)
 
     @staticmethod
-    def draw_mesh_on_faces(image_loaded, image_to_draw_on, color, size):
+    def draw_mesh_on_faces(image_loaded, image_to_draw_on, color, size, mesh_mode):
         """ TODO improve small faces on images"""
         # use masked image instead of original
         #image = cv2.imread(image_loaded.name)
@@ -93,15 +93,14 @@ class Display:
         #results = face_mesh.process(image_rgb)
         results = face_mesh.process(image_to_draw_on)
 
-
         if results.multi_face_landmarks:
             for faceLms in results.multi_face_landmarks:
-                mp_draw.draw_landmarks(image_to_draw_on, faceLms, mp_face_mesh.FACEMESH_TESSELATION, draw_spec,
+                mp_draw.draw_landmarks(image_to_draw_on, faceLms, mesh_mode, draw_spec,
                                        draw_spec)
 
     @staticmethod
     def draw_face_features(detection_mode, image_to_draw_on, faces=None, image_loaded=None, detection_mode_colors=None,
-                           detection_mode_sizes=None):
+                           detection_mode_sizes=None, detection_mode_mesh=None):
 
         is_points_selected, is_lines_selected, is_mesh_selected = detection_mode
         points_color, lines_color, mesh_color = detection_mode_colors
@@ -110,7 +109,7 @@ class Display:
         if is_points_selected:
             Display.draw_points_on_faces(faces, image_to_draw_on, points_color, points_size)
         if is_mesh_selected:
-            Display.draw_mesh_on_faces(image_loaded, image_to_draw_on, mesh_color, mesh_size)
+            Display.draw_mesh_on_faces(image_loaded, image_to_draw_on, mesh_color, mesh_size, detection_mode_mesh)
         if is_lines_selected:
             image_to_draw_on = Display.draw_lines_on_faces(image_loaded, image_to_draw_on, lines_color, lines_size)
 

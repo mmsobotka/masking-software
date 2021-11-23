@@ -1,5 +1,6 @@
 import streamlit as st
 from Display import *
+import mediapipe as mp
 
 
 class ModeSelector:
@@ -10,15 +11,17 @@ class ModeSelector:
     cnn_mode = "CNN"
     hog_mode = "HOG"
     lbph_mode = "LBPH"
+    mesh_points_mode = "Mesh with points"
+    mesh_contours_mode = "Mesh with contours"
+    mesh_triangles_mode = "Mesh with triangles"
 
     sidebar_options = [upload_default, upload_image, upload_video, upload_live_camera]
-
     default = "No mask"
-    gaussian_filter = "Mask face with gaussian filter"
-    extract_face_features = "Cut face features"
-    accurate_extract_face_features = "Accurate cut face features"
+    gaussian_filter = "Gaussian filter"
+    extract_face_features = "Cut features"
+    accurate_extract_face_features = "Accurate cut features"
     face_transform = "Face transform"
-    extract_face_features_interpolation = "Extract face features with interpolation"
+    extract_face_features_interpolation = "Interpolation features"
 
     @staticmethod
     def load_detection_mode():
@@ -30,23 +33,26 @@ class ModeSelector:
         lines_size = None
         mesh_size = None
 
+        face_mesh_mode = None
+
         st.sidebar.write("Set face features as:")
-        points = st.sidebar.checkbox("points")
+        points = st.sidebar.checkbox("Points")
         if points:
-            points_color = Display.get_color("points")
-            points_size = Display.get_slider_size("points")
+            points_color = Display.get_color("Points")
+            points_size = Display.get_slider_size("Points")
 
-        lines = st.sidebar.checkbox("lines")
+        lines = st.sidebar.checkbox("Lines")
         if lines:
-            lines_color = Display.get_color("lines")
-            lines_size = Display.get_slider_size("lines")
+            lines_color = Display.get_color("Lines")
+            lines_size = Display.get_slider_size("Lines")
 
-        mesh = st.sidebar.checkbox("mesh")
+        mesh = st.sidebar.checkbox("Mesh")
         if mesh:
-            mesh_color = Display.get_color("mesh")
-            mesh_size = Display.get_slider_size("mesh")
+            face_mesh_mode = ModeSelector.face_mesh_mode()
+            mesh_color = Display.get_color("Mesh")
+            mesh_size = Display.get_slider_size("Mesh")
 
-        return (points, lines, mesh), (points_color, lines_color, mesh_color), (points_size, lines_size, mesh_size)
+        return (points, lines, mesh), (points_color, lines_color, mesh_color), (points_size, lines_size, mesh_size), face_mesh_mode
 
     @staticmethod
     def load_recognition_mode_check_box():
@@ -62,19 +68,30 @@ class ModeSelector:
                                    ModeSelector.extract_face_features_interpolation]
         mask_mode = st.sidebar.selectbox("Set masking method as:", masking_sidebar_options)
         if mask_mode == ModeSelector.gaussian_filter:
-            filtration_size = Display.get_slider_size("size", max=60.0)
+            filtration_size = Display.get_slider_size("Size", max=60.0)
         if mask_mode == ModeSelector.extract_face_features_interpolation:
-            filtration_size = Display.get_slider_size("size", max=30.0)
+            filtration_size = Display.get_slider_size("Size", max=30.0)
         return mask_mode, filtration_size
 
     @staticmethod
     def load_inerpolation_mode():
-        right_eye = st.sidebar.checkbox("right_eye")
-        left_eye = st.sidebar.checkbox("left eye")
-        nose = st.sidebar.checkbox("nose")
-        mouth = st.sidebar.checkbox("mouth")
+        right_eye = st.sidebar.checkbox("Right eye")
+        left_eye = st.sidebar.checkbox("Left eye")
+        nose = st.sidebar.checkbox("Nose")
+        mouth = st.sidebar.checkbox("Mouth")
 
         return right_eye, left_eye, nose, mouth
+
+    @staticmethod
+    def face_mesh_mode():
+        mp_face_mesh = mp.solutions.face_mesh
+        mesh_mode = st.sidebar.radio("Set face mesh mode method as", (ModeSelector.mesh_points_mode, ModeSelector.mesh_contours_mode, ModeSelector.mesh_triangles_mode))
+        if mesh_mode == ModeSelector.mesh_points_mode:
+            return mp_face_mesh.FACEMESH_FACE_OVAL
+        if mesh_mode == ModeSelector.mesh_triangles_mode:
+            return mp_face_mesh.FACEMESH_TESSELATION
+        if mesh_mode == ModeSelector.mesh_contours_mode:
+            return mp_face_mesh.FACEMESH_CONTOURS
 
     @staticmethod
     def load_program_mode():

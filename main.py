@@ -1,15 +1,5 @@
-import numpy as np
-from PIL import Image, ImageDraw
-import streamlit as st
-import tempfile
-from matplotlib import pyplot
-from mtcnn.mtcnn import MTCNN
-import cv2
 from matplotlib.patches import Rectangle
 from matplotlib.patches import Circle
-import face_recognition
-import pyautogui
-
 from Application import *
 
 

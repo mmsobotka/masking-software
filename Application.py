@@ -39,6 +39,7 @@ class Application:
     faces = None
     recognition_result = None
     person_name = None
+    face_mesh_mode = None
 
     def __init__(self):
         Information.print_page_title()
@@ -97,7 +98,7 @@ class Application:
 
     def load_detection_mode(self):
         (self.detection_mode), (self.detection_mode_colors), (
-            self.detection_mode_sizes) = ModeSelector.load_detection_mode()
+            self.detection_mode_sizes), self.face_mesh_mode = ModeSelector.load_detection_mode()
 
     def load_masking_mode(self):
         mask_mode, size = ModeSelector.load_mask_mode()
@@ -136,7 +137,8 @@ class Application:
         self.image_after_masking = Display.draw_face_features(self.detection_mode, self.image_after_masking,
                                                               self.faces, self.image_loaded,
                                                               self.detection_mode_colors,
-                                                              self.detection_mode_sizes)
+                                                              self.detection_mode_sizes,
+                                                              self.face_mesh_mode)
 
     def write_person_name_on_face(self):
         if self.recognition_result:
