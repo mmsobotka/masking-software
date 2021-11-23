@@ -5,10 +5,11 @@ from mtcnn.mtcnn import MTCNN
 class FaceDetector:
 
     @staticmethod
-    def detect_faces(img):
-        pixels = pyplot.imread(img)
+    def detect_faces(img, img2=None):
+        #Use masked image(img2) instead original
+        #pixels = pyplot.imread(img)
         decetor = MTCNN()
-        faces = decetor.detect_faces(pixels)
+        faces = decetor.detect_faces(img2)
         return faces
 
     def face_detection_mtcnn(self, img, face_distance=None, person_name=None, display=True):

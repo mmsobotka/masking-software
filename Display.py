@@ -40,9 +40,12 @@ class Display:
 
     @staticmethod
     def draw_lines_on_faces(image_loaded, image_to_draw_on, color, size):
-        image = cv2.imread(image_loaded.name)
-        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        face_landmarks_list = face_recognition.face_landmarks(image_rgb)
+        # use masked image instead of original
+        #image = cv2.imread(image_loaded.name)
+        #image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        #face_landmarks_list = face_recognition.face_landmarks(image_rgb)
+        face_landmarks_list = face_recognition.face_landmarks(image_to_draw_on)
+
         pil_image = Image.fromarray(image_to_draw_on)
         size = int(size)
         for face_landmarks in face_landmarks_list:
@@ -62,13 +65,18 @@ class Display:
     @staticmethod
     def draw_mesh_on_faces(image_loaded, image_to_draw_on, color, size):
         """ TODO improve small faces on images"""
-        image = cv2.imread(image_loaded.name)
-        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        # use masked image instead of original
+        #image = cv2.imread(image_loaded.name)
+        #image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         mp_draw = mp.solutions.drawing_utils
         draw_spec = mp_draw.DrawingSpec(thickness=int(size), circle_radius=int(size), color=color)
         mp_face_mesh = mp.solutions.face_mesh
         face_mesh = mp_face_mesh.FaceMesh(max_num_faces=10)
-        results = face_mesh.process(image_rgb)
+
+        # use masked image instead of original
+        #results = face_mesh.process(image_rgb)
+        results = face_mesh.process(image_to_draw_on)
+
 
         if results.multi_face_landmarks:
             for faceLms in results.multi_face_landmarks:

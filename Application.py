@@ -8,17 +8,26 @@ from FaceDetector import *
 from FaceFilter import *
 import tempfile
 
+#TODO
+# when mesh is selected add 2 options - lines, points
+# display message - face is detected
+# restart button
+
 
 class Application:
     image_loaded = None
     video_loaded = None
     camera_loaded = None
+    image_learn_recognition_loaded = None
+
     detection_mode = None
     detection_mode_colors = None
     detection_mode_sizes = None
+    recognition_mode = None
     masking_mode = None
     masking_size = None
     is_face_detection_enabled = None
+    is_face_recognition_enabled = None
 
     image_after_masking = None
     box_on_faces = None
@@ -44,9 +53,13 @@ class Application:
                 self.load_box_on_face_check_box()
                 self.load_detection_mode()
                 self.load_masking_mode()
-                self.detect_faces()
                 self.run_masking_mode()
+                self.detect_faces()
                 self.draw_on_image()
+
+            self.enable_face_recognition()
+            if self.is_face_recognition_enabled:
+                self.load_image_to_learn_recognition_mode()
 
             Display.view_image(self.image_after_masking)
 
@@ -58,6 +71,14 @@ class Application:
             image.write(image_loaded.read())
             self.image_loaded = image
             self.prepare_image_to_draw_on()
+
+    def load_image_to_learn_recognition_mode(self):
+        image_loaded = st.sidebar.file_uploader("Please select image to upload", type=['png', 'jpg', 'jpeg'],
+                                                key="upload_2")
+        if image_loaded:
+            image = tempfile.NamedTemporaryFile(delete=False)
+            image.write(image_loaded.read())
+            self.image_learn_recognition_loaded = image
 
     def load_detection_mode(self):
         (self.detection_mode), (self.detection_mode_colors), (
@@ -72,8 +93,12 @@ class Application:
         is_face_detection_enabled = ModeSelector.load_face_detector_check_box()
         self.is_face_detection_enabled = is_face_detection_enabled
 
+    def enable_face_recognition(self):
+        is_face_recognition_enabled = ModeSelector.load_face_recognition_check_box()
+        self.is_face_recognition_enabled = is_face_recognition_enabled
+
     def detect_faces(self):
-        self.faces = FaceDetector.detect_faces(self.image_loaded)
+        self.faces = FaceDetector.detect_faces(self.image_loaded, self.image_after_masking)
 
     def prepare_image_to_draw_on(self):
         image = cv2.imread(self.image_loaded.name)
@@ -82,6 +107,9 @@ class Application:
 
     def load_box_on_face_check_box(self):
         self.box_on_faces = ModeSelector.load_box_on_face_check_box()
+
+    def load_recognition_mode_check_box(self):
+        self.recognition_mode = ModeSelector.load_recognition_mode_check_box()
 
     def draw_on_image(self):
         if self.box_on_faces:

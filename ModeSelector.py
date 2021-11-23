@@ -45,6 +45,10 @@ class ModeSelector:
         return (points, lines, mesh), (points_color, lines_color, mesh_color), (points_size, lines_size, mesh_size)
 
     @staticmethod
+    def load_recognition_mode_check_box():
+
+
+    @staticmethod
     def load_mask_mode():
         filtration_size = None
         masking_sidebar_options = [ModeSelector.default, ModeSelector.gaussian_filter,
@@ -74,6 +78,10 @@ class ModeSelector:
     @staticmethod
     def load_face_detector_check_box():
         return st.sidebar.checkbox("Face detection")
+
+    @staticmethod
+    def load_face_recognition_check_box():
+        return st.sidebar.checkbox("Face recognition")
 
     @staticmethod
     def load_box_on_face_check_box():
