@@ -328,12 +328,6 @@ class MyClass:
 
         known_person = face_recognition.load_image_file(KNOWN_IMAGE)
 
-        '''im = PIL.Image.open(file)
-        if mode:
-            im = im.convert(mode)
-        return np.array(im)
-        '''
-
         unknown_person = face_recognition.load_image_file(UNKNOWN_IMAGE)
         if self.FACE_IMAGE_MASKED is not None:
             print('log')

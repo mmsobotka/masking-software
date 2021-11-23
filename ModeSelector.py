@@ -7,6 +7,9 @@ class ModeSelector:
     upload_image = "Load Image"
     upload_video = "Load Video"
     upload_live_camera = "Live Camera"
+    cnn_mode = "CNN"
+    hog_mode = "HOG"
+    lbph_mode = "LBPH"
 
     sidebar_options = [upload_default, upload_image, upload_video, upload_live_camera]
 
@@ -46,6 +49,8 @@ class ModeSelector:
 
     @staticmethod
     def load_recognition_mode_check_box():
+        face_recognition_mode = st.sidebar.radio("Select mode for face recognition", (ModeSelector.cnn_mode, ModeSelector.hog_mode, ModeSelector.lbph_mode))
+        return face_recognition_mode
 
 
     @staticmethod

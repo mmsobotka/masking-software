@@ -6,12 +6,14 @@ from ModeSelector import *
 from Display import *
 from FaceDetector import *
 from FaceFilter import *
+from FaceRecognizer import *
 import tempfile
 
 #TODO
 # when mesh is selected add 2 options - lines, points
-# display message - face is detected
+# display message - face is detected st.write("Face was detected")
 # restart button
+# warning - is face to small to use mediapipe
 
 
 class Application:
@@ -19,7 +21,6 @@ class Application:
     video_loaded = None
     camera_loaded = None
     image_learn_recognition_loaded = None
-
     detection_mode = None
     detection_mode_colors = None
     detection_mode_sizes = None
@@ -28,10 +29,10 @@ class Application:
     masking_size = None
     is_face_detection_enabled = None
     is_face_recognition_enabled = None
-
     image_after_masking = None
     box_on_faces = None
     faces = None
+    recognition_result = None
 
     def __init__(self):
         Information.print_page_title()
@@ -55,11 +56,18 @@ class Application:
                 self.load_masking_mode()
                 self.run_masking_mode()
                 self.detect_faces()
-                self.draw_on_image()
 
             self.enable_face_recognition()
             if self.is_face_recognition_enabled:
                 self.load_image_to_learn_recognition_mode()
+                if self.image_learn_recognition_loaded:
+                    Display.load_image_on_sidebar(self.image_learn_recognition_loaded)
+                    self.load_recognition_mode_check_box()
+                    self.recognition_result = FaceRecognizer.recognize_faces(self.image_after_masking, self.image_learn_recognition_loaded, self.recognition_mode)
+                    st.write(self.recognition_result)
+
+            if self.is_face_detection_enabled:
+                self.draw_on_image()
 
             Display.view_image(self.image_after_masking)
 
@@ -114,11 +122,19 @@ class Application:
     def draw_on_image(self):
         if self.box_on_faces:
             Display.draw_box_on_faces(self.faces, self.image_after_masking, (255, 0, 0))
-
+            self.write_person_name_on_face()
         self.image_after_masking = Display.draw_face_features(self.detection_mode, self.image_after_masking,
                                                               self.faces, self.image_loaded,
                                                               self.detection_mode_colors,
                                                               self.detection_mode_sizes)
+
+    def write_person_name_on_face(self):
+        if self.recognition_result:
+            name = "UNKNOWN"
+            if self.recognition_result > 40:
+                name = "person " + str(self.recognition_result) + "%"
+            Display.draw_rectangle_under_faces(self.faces, self.image_after_masking, (255, 0, 0))
+            Display.write_names_under_faces(self.faces, self.image_after_masking, (255, 255, 255), name)
 
     def run_masking_mode(self):
         if self.masking_mode == ModeSelector.default:

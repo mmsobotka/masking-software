@@ -33,6 +33,18 @@ class Display:
             cv2.rectangle(image_to_draw_on, (x, y), (x + width, y + height), color, 2)
 
     @staticmethod
+    def draw_rectangle_under_faces(faces, image_to_draw_on, color):
+        for face in faces:
+            x, y, width, height = face['box']
+            cv2.rectangle(image_to_draw_on, (x, y + height), (x + width, y + height+35), color, cv2.FILLED)
+
+    @staticmethod
+    def write_names_under_faces(faces, image_to_draw_on, color, name="UNKNOWN"):
+        for face in faces:
+            x, y, width, height = face['box']
+            cv2.putText(image_to_draw_on, name, (x + 6, y + height + 28), cv2.FONT_HERSHEY_DUPLEX, 0.8, color, 1)
+
+    @staticmethod
     def draw_points_on_faces(faces, image_to_draw_on, color, size):
         for face in faces:
             for key, value in face['keypoints'].items():
