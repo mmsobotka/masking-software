@@ -14,7 +14,12 @@ import tempfile
 # display message - face is detected st.write("Face was detected")
 # restart button
 # warning - is face to small to use mediapipe
-
+# rescaling of input images
+# size of rectangle under box and name text with face and text should be linked with size of face size
+# when few faces recognition return list of faces or find the most recognized one
+# when face in picture is too small then print warning to upload another image ( check media pipe face sizes internal options)
+# check if hog and cnn recognition mode works correctly
+# p2 in cut face features user should chose what to cut
 
 class Application:
     image_loaded = None
@@ -33,6 +38,7 @@ class Application:
     box_on_faces = None
     faces = None
     recognition_result = None
+    person_name = None
 
     def __init__(self):
         Information.print_page_title()
@@ -62,6 +68,7 @@ class Application:
                 self.load_image_to_learn_recognition_mode()
                 if self.image_learn_recognition_loaded:
                     Display.load_image_on_sidebar(self.image_learn_recognition_loaded)
+                    self.get_person_name()
                     self.load_recognition_mode_check_box()
                     self.recognition_result = FaceRecognizer.recognize_faces(self.image_after_masking, self.image_learn_recognition_loaded, self.recognition_mode)
                     st.write(self.recognition_result)
@@ -103,6 +110,9 @@ class Application:
 
     def enable_face_recognition(self):
         is_face_recognition_enabled = ModeSelector.load_face_recognition_check_box()
+        if is_face_recognition_enabled:
+            box_on_faces = True
+
         self.is_face_recognition_enabled = is_face_recognition_enabled
 
     def detect_faces(self):
@@ -132,7 +142,7 @@ class Application:
         if self.recognition_result:
             name = "UNKNOWN"
             if self.recognition_result > 40:
-                name = "person " + str(self.recognition_result) + "%"
+                name = self.person_name + " " + str(self.recognition_result) + "%"
             Display.draw_rectangle_under_faces(self.faces, self.image_after_masking, (255, 0, 0))
             Display.write_names_under_faces(self.faces, self.image_after_masking, (255, 255, 255), name)
 
@@ -184,3 +194,7 @@ class Application:
                 self.image_after_masking,
                 self.masking_size,
                 FaceFilter.mouth_indices)
+
+    def get_person_name(self):
+        self.person_name = Display.get_person_name_label()
+

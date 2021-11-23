@@ -111,3 +111,8 @@ class Display:
             image_to_draw_on = Display.draw_lines_on_faces(image_loaded, image_to_draw_on, lines_color, lines_size)
 
         return image_to_draw_on
+
+    @staticmethod
+    def get_person_name_label():
+        name = st.sidebar.text_input('Person name', " ")
+        return name

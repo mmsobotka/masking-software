@@ -28,5 +28,9 @@ class FaceRecognizer:
             return 0
 
         recognized_distance = face_recognition.face_distance(encoding_model_person, encoding_unknown_person[0])
+
+        if len(recognized_distance) > 1:
+            recognized_distance = recognized_distance[0]
+
         recognized_distance = int((1 - recognized_distance) * 100)
         return recognized_distance
