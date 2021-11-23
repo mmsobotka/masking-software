@@ -71,7 +71,7 @@ class Application:
                     self.get_person_name()
                     self.load_recognition_mode_check_box()
                     self.recognition_result = FaceRecognizer.recognize_faces(self.image_after_masking, self.image_learn_recognition_loaded, self.recognition_mode)
-                    st.write(self.recognition_result)
+                    # st.write(self.recognition_result)
 
             if self.is_face_detection_enabled:
                 self.draw_on_image()
@@ -111,7 +111,7 @@ class Application:
     def enable_face_recognition(self):
         is_face_recognition_enabled = ModeSelector.load_face_recognition_check_box()
         if is_face_recognition_enabled:
-            box_on_faces = True
+            self.box_on_faces = True
 
         self.is_face_recognition_enabled = is_face_recognition_enabled
 
@@ -160,6 +160,9 @@ class Application:
                                                                         FaceFilter.left_eye_indices)
             self.image_after_masking = FaceFilter.run_face_cut_features(self.image_loaded, self.image_after_masking,
                                                                         FaceFilter.right_eye_indices)
+        elif self.masking_mode == ModeSelector.accurate_extract_face_features:
+            self.image_after_masking = FaceFilter.run_face_cut_features2(self.image_loaded, self.image_after_masking)
+
         elif self.masking_mode == ModeSelector.face_transform:
             pass
         elif self.masking_mode == ModeSelector.extract_face_features_interpolation:

@@ -13,4 +13,3 @@ class FaceDetector:
         faces = decetor.detect_faces(img2)
         return faces
 
-

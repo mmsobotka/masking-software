@@ -28,6 +28,10 @@ class Display:
 
     @staticmethod
     def draw_box_on_faces(faces, image_to_draw_on, color):
+        if len(faces) > 0:
+            st.sidebar.success("Face was detected!")
+        else:
+            st.sidebar.error("Face wasn't detected!")
         for face in faces:
             x, y, width, height = face['box']
             cv2.rectangle(image_to_draw_on, (x, y), (x + width, y + height), color, 2)

@@ -14,10 +14,11 @@ class ModeSelector:
     sidebar_options = [upload_default, upload_image, upload_video, upload_live_camera]
 
     default = "No mask"
-    gaussian_filter = "Gaussian filter"
+    gaussian_filter = "Mask face with gaussian filter"
     extract_face_features = "Cut face features"
+    accurate_extract_face_features = "Accurate cut face features"
     face_transform = "Face transform"
-    extract_face_features_interpolation = "Extract face features interpolation"
+    extract_face_features_interpolation = "Extract face features with interpolation"
 
     @staticmethod
     def load_detection_mode():
@@ -57,7 +58,7 @@ class ModeSelector:
     def load_mask_mode():
         filtration_size = None
         masking_sidebar_options = [ModeSelector.default, ModeSelector.gaussian_filter,
-                                   ModeSelector.extract_face_features, ModeSelector.face_transform,
+                                   ModeSelector.extract_face_features, ModeSelector.accurate_extract_face_features, ModeSelector.face_transform,
                                    ModeSelector.extract_face_features_interpolation]
         mask_mode = st.sidebar.selectbox("Set masking method as:", masking_sidebar_options)
         if mask_mode == ModeSelector.gaussian_filter:

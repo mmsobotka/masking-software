@@ -1,6 +1,7 @@
 import cv2
 import mediapipe as mp
 import numpy as np
+import face_recognition
 
 
 class FaceFilter:
@@ -64,4 +65,40 @@ class FaceFilter:
     def run_face_cut_features(image_loaded, image_to_draw_on, indices):
         polygon_postions = FaceFilter.get_mask_polygon_positions(image_loaded, image_to_draw_on, indices)
         cv2.fillPoly(image_to_draw_on, [np.array([polygon_postions], np.int32)], (0, 0, 0))
+        return image_to_draw_on
+
+
+    @staticmethod
+    def run_face_cut_features2(image_loaded, image_to_draw_on):
+        face_landmark_list = face_recognition.face_landmarks(image_to_draw_on)
+        print(face_landmark_list)
+        for face_landmarks in face_landmark_list:
+            top_lip = []
+            bottom_lip = []
+            right_eye = []
+            left_eye = []
+            nose_tip = []
+
+            for i in range(12):
+                points = list(face_landmarks["top_lip"][i])
+                top_lip.append(points)
+                points = list(face_landmarks['bottom_lip'][i])
+                bottom_lip.append(points)
+
+            for i in range(6):
+                points = list(face_landmarks['right_eye'][i])
+                right_eye.append(points)
+                points = list(face_landmarks['left_eye'][i])
+                left_eye.append(points)
+
+            for i in range(5):
+                points = list(face_landmarks['nose_tip'][i])
+                nose_tip.append(points)
+
+            cv2.fillPoly(image_to_draw_on, [np.array([top_lip], np.int32)], (0, 0, 0))
+            cv2.fillPoly(image_to_draw_on, [np.array([bottom_lip], np.int32)], (0, 0, 0))
+            cv2.fillPoly(image_to_draw_on, [np.array([right_eye], np.int32)], (0, 0, 0))
+            cv2.fillPoly(image_to_draw_on, [np.array([left_eye], np.int32)], (0, 0, 0))
+            cv2.fillPoly(image_to_draw_on, [np.array([nose_tip], np.int32)], (0, 0, 0))
+
         return image_to_draw_on
