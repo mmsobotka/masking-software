@@ -78,6 +78,8 @@ class FaceFilter:
             right_eye = []
             left_eye = []
             nose_tip = []
+            #chin = []
+            #nose_bridge = []
 
             for i in range(12):
                 points = list(face_landmarks["top_lip"][i])
