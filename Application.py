@@ -1,4 +1,7 @@
+import cv2.cv2
+import numpy as np
 import streamlit as st
+import ffmpeg
 
 import FaceFilter
 from Information import *
@@ -6,10 +9,14 @@ from ModeSelector import *
 from Display import *
 from FaceDetector import *
 from FaceFilter import *
+import datetime
 from FaceRecognizer import *
 import tempfile
+from mtcnn.mtcnn import MTCNN
+from moviepy.editor import *
 
-#TODO
+
+# TODO
 # when mesh is selected add 2 options - lines, points
 # display message - face is detected st.write("Face was detected")
 # restart button
@@ -40,12 +47,17 @@ class Application:
     recognition_result = None
     person_name = None
     face_mesh_mode = None
+    video = None
+    detector = None
+    print_allert_face_detected = None
+    inerpolation_mode = None
 
     def __init__(self):
         Information.print_page_title()
 
     def load_interface(self):
         program_mode = ModeSelector.load_program_mode()
+        self.detector = MTCNN()
 
         if program_mode == ModeSelector.upload_default:
             Information.print_main_page()
@@ -55,29 +67,16 @@ class Application:
             if self.image_loaded:
                 Display.load_image_on_sidebar(self.image_loaded)
 
-        if self.image_loaded or self.video_loaded or self.camera_loaded:
-            self.enable_face_detection()
-            if self.is_face_detection_enabled:
-                self.load_box_on_face_check_box()
-                self.load_detection_mode()
-                self.load_masking_mode()
-                self.run_masking_mode()
-                self.detect_faces()
+        if program_mode == ModeSelector.upload_video:
+            self.load_video_mode()
+            if self.video_loaded:
+                self.video = Display.load_video_on_sidebar(self.video_loaded)
 
-            self.enable_face_recognition()
-            if self.is_face_recognition_enabled:
-                self.load_image_to_learn_recognition_mode()
-                if self.image_learn_recognition_loaded:
-                    Display.load_image_on_sidebar(self.image_learn_recognition_loaded)
-                    self.get_person_name()
-                    self.load_recognition_mode_check_box()
-                    self.recognition_result = FaceRecognizer.recognize_faces(self.image_after_masking, self.image_learn_recognition_loaded, self.recognition_mode)
-                    # st.write(self.recognition_result)
+        if self.image_loaded:
+            self.run_application_image()
 
-            if self.is_face_detection_enabled:
-                self.draw_on_image()
-
-            Display.view_image(self.image_after_masking)
+        if self.video_loaded or self.camera_loaded:
+            self.run_application_video()
 
     def load_image_mode(self):
         image_loaded = st.sidebar.file_uploader("Please select image to upload", type=['png', 'jpg', 'jpeg'],
@@ -87,6 +86,17 @@ class Application:
             image.write(image_loaded.read())
             self.image_loaded = image
             self.prepare_image_to_draw_on()
+            self.print_allert_face_detected = True
+
+    def load_video_mode(self):
+        video_loaded = st.sidebar.file_uploader("Please select image to upload", type=['mp4', 'mov'],
+                                                key="upload_video")
+
+        if video_loaded:
+            video = tempfile.NamedTemporaryFile(delete=False)
+            video.write(video_loaded.read())
+            self.video_loaded = video
+            self.print_allert_face_detected = False
 
     def load_image_to_learn_recognition_mode(self):
         image_loaded = st.sidebar.file_uploader("Please select image to upload", type=['png', 'jpg', 'jpeg'],
@@ -117,7 +127,7 @@ class Application:
         self.is_face_recognition_enabled = is_face_recognition_enabled
 
     def detect_faces(self):
-        self.faces = FaceDetector.detect_faces(self.image_loaded, self.image_after_masking)
+        self.faces = FaceDetector.detect_faces(self.image_loaded, self.image_after_masking, self.detector)
 
     def prepare_image_to_draw_on(self):
         image = cv2.imread(self.image_loaded.name)
@@ -132,7 +142,8 @@ class Application:
 
     def draw_on_image(self):
         if self.box_on_faces:
-            Display.draw_box_on_faces(self.faces, self.image_after_masking, (255, 0, 0))
+            Display.draw_box_on_faces(self.faces, self.image_after_masking, (255, 0, 0),
+                                      self.print_allert_face_detected)
             self.write_person_name_on_face()
         self.image_after_masking = Display.draw_face_features(self.detection_mode, self.image_after_masking,
                                                               self.faces, self.image_loaded,
@@ -168,8 +179,7 @@ class Application:
         elif self.masking_mode == ModeSelector.face_transform:
             pass
         elif self.masking_mode == ModeSelector.extract_face_features_interpolation:
-            inerpolation_mode = ModeSelector.load_inerpolation_mode()
-            self.run_interpolation_mode(inerpolation_mode)
+            self.run_interpolation_mode(self.inerpolation_mode)
             # self.image_after_masking = FaceFilter.run_face_filter_face_features_extraction_interpolation(
             #   self.image_loaded, self.image_after_masking, )
 
@@ -203,3 +213,91 @@ class Application:
     def get_person_name(self):
         self.person_name = Display.get_person_name_label()
 
+    def run_application_image(self):
+        self.enable_face_detection()
+        if self.is_face_detection_enabled:
+            self.load_box_on_face_check_box()  # checkbox only
+            self.load_detection_mode()  # checkbox only
+            self.load_masking_mode()  # checkbox only
+
+            if self.masking_mode == ModeSelector.extract_face_features_interpolation:
+                self.inerpolation_mode = ModeSelector.load_inerpolation_mode()  # todo change name
+
+            self.run_masking_mode()
+            self.detect_faces()
+
+        self.enable_face_recognition()  # checkbox only
+        if self.is_face_recognition_enabled:
+            self.load_image_to_learn_recognition_mode()
+            if self.image_learn_recognition_loaded:
+                Display.load_image_on_sidebar(self.image_learn_recognition_loaded)
+                self.get_person_name()
+                self.load_recognition_mode_check_box()
+                self.recognition_result = FaceRecognizer.recognize_faces(self.image_after_masking,
+                                                                         self.image_learn_recognition_loaded,
+                                                                         self.recognition_mode)
+                # st.write(self.recognition_result)
+
+        if self.is_face_detection_enabled:
+            self.draw_on_image()
+
+        Display.view_image(self.image_after_masking)
+
+    def run_application_video(self):
+        self.enable_face_detection()  # checkbox only
+        if self.is_face_detection_enabled:
+            self.load_box_on_face_check_box()  # checkbox only
+            self.load_detection_mode()  # checkbox only
+            self.load_masking_mode()  # checkbox only
+
+            if self.masking_mode == ModeSelector.extract_face_features_interpolation:
+                self.inerpolation_mode = ModeSelector.load_inerpolation_mode()  # todo change name
+
+        self.enable_face_recognition()
+        if self.is_face_recognition_enabled:
+            self.load_image_to_learn_recognition_mode()  # file uploader only
+            if self.image_learn_recognition_loaded:
+                Display.load_image_on_sidebar(self.image_learn_recognition_loaded)  # ?
+                self.get_person_name()  # once
+                self.load_recognition_mode_check_box()  # checkbox only
+                # st.write(self.recognition_result)
+
+        if self.is_face_detection_enabled and st.sidebar.button("play"):
+
+            frames = self.video
+            stframe = st.empty()
+            images_after_masking = []
+            # frames = [frames[0], frames[1]]
+
+            my_bar = st.progress(0)
+            n_frames = len(frames)
+            percentage_per_frame = 100 / n_frames
+
+            frame_height, frame_width, _ = shape = frames[0].shape
+            width = 1280
+            scale_percent = (width / frame_width) * 100
+
+            print(scale_percent)
+            print(shape)
+            width = int(frames[0].shape[1] * scale_percent / 100)
+            height = int(frames[0].shape[0] * scale_percent / 100)
+            dim = (width, height)
+
+            for index, frame in enumerate(frames):
+                frame = cv2.resize(frame, dim)
+
+                my_bar.progress(int(index * percentage_per_frame))
+                self.image_after_masking = frame
+                self.run_masking_mode()  # TODO interpolation mode creates new checkboxes
+                self.detect_faces()
+                self.draw_on_image()  # per frame
+
+                if self.is_face_recognition_enabled:
+                    self.recognition_result = FaceRecognizer.recognize_faces(self.image_after_masking,
+                                                                             self.image_learn_recognition_loaded,
+                                                                             self.recognition_mode)  # per frame
+
+                images_after_masking.append(self.image_after_masking)
+
+            for frame in images_after_masking:
+                stframe.image(frame)

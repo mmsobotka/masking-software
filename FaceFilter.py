@@ -2,7 +2,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import face_recognition
-
+import datetime
 
 class FaceFilter:
     right_eye_indices = [342, 445, 444, 443, 442, 441, 413, 464, 453, 452, 451, 450, 449, 448, 261, 446]
@@ -15,12 +15,9 @@ class FaceFilter:
 
     @staticmethod
     def get_mask_polygon_positions(image_loaded, image_to_draw_on, indices):
-        image = cv2.imread(image_loaded.name)
-        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         mp_face_mesh = mp.solutions.face_mesh
-        face_mesh = mp_face_mesh.FaceMesh(max_num_faces=10)
-        results = face_mesh.process(image_rgb)
-
+        face_mesh = mp_face_mesh.FaceMesh(max_num_faces=5)
+        results = face_mesh.process(image_to_draw_on)
         height, width, _ = image_to_draw_on.shape
         polygon_positions = []
 
@@ -37,9 +34,10 @@ class FaceFilter:
     @staticmethod
     def get_mask_polygon(image_loaded, image_to_draw_on, indices):
         polygon_positions = FaceFilter.get_mask_polygon_positions(image_loaded, image_to_draw_on, indices)
+        if len(polygon_positions) == 0:
+            return []
         mask_image = np.zeros(image_to_draw_on.shape[:2], np.uint8)
         cv2.fillPoly(mask_image, [np.array([polygon_positions], np.int32)], (255, 0, 0))
-
         return mask_image
 
     @staticmethod
@@ -48,6 +46,7 @@ class FaceFilter:
         blur = cv2.blur(image, (int(size), int(size)))
         mask = FaceFilter.get_mask_polygon(image_loaded, image_to_draw_on, indices)
 
+        #TODO remove this loop ( very slow )
         for y, row in enumerate(mask):
             for x, pixel in enumerate(row):
                 if pixel:

@@ -11,9 +11,9 @@ class ModeSelector:
     cnn_mode = "CNN"
     hog_mode = "HOG"
     lbph_mode = "LBPH"
-    mesh_points_mode = "Mesh with points"
-    mesh_contours_mode = "Mesh with contours"
-    mesh_triangles_mode = "Mesh with triangles"
+    mesh_points_mode = "mesh with points"
+    mesh_contours_mode = "mesh with contours"
+    mesh_triangles_mode = "mesh with triangles"
 
     sidebar_options = [upload_default, upload_image, upload_video, upload_live_camera]
     default = "No mask"
@@ -36,21 +36,21 @@ class ModeSelector:
         face_mesh_mode = None
 
         st.sidebar.write("Set face features as:")
-        points = st.sidebar.checkbox("Points")
+        points = st.sidebar.checkbox("points")
         if points:
-            points_color = Display.get_color("Points")
-            points_size = Display.get_slider_size("Points")
+            points_color = Display.get_color("points")
+            points_size = Display.get_slider_size("points")
 
-        lines = st.sidebar.checkbox("Lines")
+        lines = st.sidebar.checkbox("lines")
         if lines:
-            lines_color = Display.get_color("Lines")
-            lines_size = Display.get_slider_size("Lines")
+            lines_color = Display.get_color("lines")
+            lines_size = Display.get_slider_size("lines")
 
-        mesh = st.sidebar.checkbox("Mesh")
+        mesh = st.sidebar.checkbox("mesh")
         if mesh:
             face_mesh_mode = ModeSelector.face_mesh_mode()
-            mesh_color = Display.get_color("Mesh")
-            mesh_size = Display.get_slider_size("Mesh")
+            mesh_color = Display.get_color("mesh")
+            mesh_size = Display.get_slider_size("mesh")
 
         return (points, lines, mesh), (points_color, lines_color, mesh_color), (points_size, lines_size, mesh_size), face_mesh_mode
 
@@ -108,4 +108,4 @@ class ModeSelector:
 
     @staticmethod
     def load_box_on_face_check_box():
-        return st.sidebar.checkbox("Draw box")
+        return st.sidebar.checkbox("Check face detection")

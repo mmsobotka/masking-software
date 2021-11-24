@@ -30,6 +30,7 @@ class MyClass:
         vf = cv2.VideoCapture(vid.name)
         stframe = st.empty()
 
+
         while vf.isOpened():
             ret, frame = vf.read()
             if not ret:
