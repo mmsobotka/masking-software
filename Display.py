@@ -4,7 +4,7 @@ import streamlit as st
 import cv2
 import face_recognition
 import mediapipe as mp
-import time
+
 
 class Display:
     @staticmethod
@@ -17,7 +17,6 @@ class Display:
         print("load Video!")
         video = cv2.VideoCapture(vid.name)
         frames = []
-
 
         ret, frame = video.read()
         max_width = 1000
@@ -40,30 +39,8 @@ class Display:
                 break
             frame = cv2.resize(frame, dim)
             frames.append(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-
-        time.sleep(10)
         video.release()
 
-
-        # scale to smaller sizes
-        """
-        if len(frames) > 0:
-            max_width = 1000
-            max_height = 600
-            height, width, _ = frames[0].shape
-
-            scale_ratio_1 = height / max_height
-            scale_ratio_2 = width / max_width
-            scale_ratio = max(scale_ratio_1, scale_ratio_2)
-            scale_ratio = (1.0 / scale_ratio)
-
-            new_width = int(scale_ratio * width)
-            new_height = int(scale_ratio * height)
-            dim = (new_width, new_height)
-            for index, frame in enumerate(frames):
-                frames[index] = cv2.resize(frame, dim)
-                
-                """
         return frames
 
     @staticmethod
@@ -112,10 +89,6 @@ class Display:
 
     @staticmethod
     def draw_lines_on_faces(image_to_draw_on, color, size):
-        # use masked image instead of original
-        # image = cv2.imread(image_loaded.name)
-        # image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        # face_landmarks_list = face_recognition.face_landmarks(image_rgb)
         face_landmarks_list = face_recognition.face_landmarks(image_to_draw_on)
 
         pil_image = Image.fromarray(image_to_draw_on)
@@ -135,11 +108,8 @@ class Display:
         return np.array(pil_image)
 
     @staticmethod
-    def draw_mesh_on_faces( image_to_draw_on, color, size, mesh_mode):
+    def draw_mesh_on_faces(image_to_draw_on, color, size, mesh_mode):
         """ TODO improve small faces on images"""
-        # use masked image instead of original
-        # image = cv2.imread(image_loaded.name)
-        # image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         mp_draw = mp.solutions.drawing_utils
         draw_spec = mp_draw.DrawingSpec(thickness=int(size), circle_radius=int(size), color=color)
         mp_face_mesh = mp.solutions.face_mesh
@@ -155,7 +125,7 @@ class Display:
                                        draw_spec)
 
     @staticmethod
-    def draw_face_features(detection_mode, image_to_draw_on, faces=None, image_loaded=None, detection_mode_colors=None,
+    def draw_face_features(detection_mode, image_to_draw_on, faces=None, detection_mode_colors=None,
                            detection_mode_sizes=None, detection_mode_mesh=None):
 
         is_points_selected, is_lines_selected, is_mesh_selected = detection_mode
@@ -165,9 +135,9 @@ class Display:
         if is_points_selected:
             Display.draw_points_on_faces(faces, image_to_draw_on, points_color, points_size)
         if is_mesh_selected:
-            Display.draw_mesh_on_faces(image_loaded, image_to_draw_on, mesh_color, mesh_size, detection_mode_mesh)
+            Display.draw_mesh_on_faces(image_to_draw_on, mesh_color, mesh_size, detection_mode_mesh)
         if is_lines_selected:
-            image_to_draw_on = Display.draw_lines_on_faces(image_loaded, image_to_draw_on, lines_color, lines_size)
+            image_to_draw_on = Display.draw_lines_on_faces(image_to_draw_on, lines_color, lines_size)
 
         return image_to_draw_on
 

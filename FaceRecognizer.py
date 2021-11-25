@@ -9,9 +9,9 @@ class FaceRecognizer:
             return FaceRecognizer.face_recognition_function(unknown_image, model_image, mode)
         elif mode == ModeSelector.hog_mode:
             return FaceRecognizer.face_recognition_function(unknown_image, model_image, mode)
-        elif mode == ModeSelector.lbph_mode:
-            pass
-
+        # TODO
+        # elif mode == ModeSelector.lbph_mode:
+        #     pass
 
     @staticmethod
     def face_recognition_function(unknown_image, model_image, mode):

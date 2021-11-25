@@ -10,7 +10,7 @@ class ModeSelector:
     upload_live_camera = "Live Camera"
     cnn_mode = "CNN"
     hog_mode = "HOG"
-    lbph_mode = "LBPH"
+    # lbph_mode = "LBPH"
     mesh_points_mode = "mesh with points"
     mesh_contours_mode = "mesh with contours"
     mesh_triangles_mode = "mesh with triangles"
@@ -20,7 +20,7 @@ class ModeSelector:
     gaussian_filter = "Gaussian filter"
     extract_face_features = "Cut features"
     accurate_extract_face_features = "Accurate cut features"
-    face_transform = "Face transform"
+    # face_transform = "Face transform"
     extract_face_features_interpolation = "Interpolation features"
 
     @staticmethod
@@ -52,19 +52,21 @@ class ModeSelector:
             mesh_color = Display.get_color("mesh")
             mesh_size = Display.get_slider_size("mesh")
 
-        return (points, lines, mesh), (points_color, lines_color, mesh_color), (points_size, lines_size, mesh_size), face_mesh_mode
+        return (points, lines, mesh), (points_color, lines_color, mesh_color), (
+            points_size, lines_size, mesh_size), face_mesh_mode
 
     @staticmethod
     def load_recognition_mode_check_box():
-        face_recognition_mode = st.sidebar.radio("Select mode for face recognition", (ModeSelector.cnn_mode, ModeSelector.hog_mode, ModeSelector.lbph_mode))
+        face_recognition_mode = st.sidebar.radio("Select mode for face recognition", (
+            ModeSelector.cnn_mode, ModeSelector.hog_mode))  # ModeSelector.lbph_mode))
         return face_recognition_mode
-
 
     @staticmethod
     def load_mask_mode():
         filtration_size = None
         masking_sidebar_options = [ModeSelector.default, ModeSelector.gaussian_filter,
-                                   ModeSelector.extract_face_features, ModeSelector.accurate_extract_face_features, ModeSelector.face_transform,
+                                   ModeSelector.extract_face_features, ModeSelector.accurate_extract_face_features,
+                                   # ModeSelector.face_transform,
                                    ModeSelector.extract_face_features_interpolation]
         mask_mode = st.sidebar.selectbox("Set masking method as:", masking_sidebar_options)
         if mask_mode == ModeSelector.gaussian_filter:
@@ -74,7 +76,7 @@ class ModeSelector:
         return mask_mode, filtration_size
 
     @staticmethod
-    def load_inerpolation_mode():
+    def load_interpolation_mode():
         right_eye = st.sidebar.checkbox("Right eye")
         left_eye = st.sidebar.checkbox("Left eye")
         nose = st.sidebar.checkbox("Nose")
@@ -85,7 +87,8 @@ class ModeSelector:
     @staticmethod
     def face_mesh_mode():
         mp_face_mesh = mp.solutions.face_mesh
-        mesh_mode = st.sidebar.radio("Set face mesh mode method as", (ModeSelector.mesh_points_mode, ModeSelector.mesh_contours_mode, ModeSelector.mesh_triangles_mode))
+        mesh_mode = st.sidebar.radio("Set face mesh mode method as", (
+            ModeSelector.mesh_points_mode, ModeSelector.mesh_contours_mode, ModeSelector.mesh_triangles_mode))
         if mesh_mode == ModeSelector.mesh_points_mode:
             return mp_face_mesh.FACEMESH_FACE_OVAL
         if mesh_mode == ModeSelector.mesh_triangles_mode:

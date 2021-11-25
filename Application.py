@@ -1,34 +1,23 @@
 import cv2.cv2
-import numpy as np
-import streamlit as st
 import gc
-
-import skvideo.io
-
 import FaceFilter
 from Information import *
-from ModeSelector import *
-from Display import *
 from FaceDetector import *
 from FaceFilter import *
-import datetime
 from FaceRecognizer import *
 import tempfile
 from mtcnn.mtcnn import MTCNN
-from moviepy.editor import *
 
 
 # TODO
-# when mesh is selected add 2 options - lines, points
-# display message - face is detected st.write("Face was detected")
 # restart button
-# warning - is face to small to use mediapipe
 # rescaling of input images
 # size of rectangle under box and name text with face and text should be linked with size of face size
 # when few faces recognition return list of faces or find the most recognized one
 # when face in picture is too small then print warning to upload another image ( check media pipe face sizes internal options)
 # check if hog and cnn recognition mode works correctly
 # p2 in cut face features user should chose what to cut
+# reload with change main mode
 
 class Application:
     image_loaded = None
@@ -52,7 +41,7 @@ class Application:
     video = None
     detector = None
     print_allert_face_detected = None
-    inerpolation_mode = None
+    interpolation_mode = None
 
     def __init__(self):
         Information.print_page_title()
@@ -128,7 +117,7 @@ class Application:
         self.is_face_recognition_enabled = is_face_recognition_enabled
 
     def detect_faces(self):
-        self.faces = FaceDetector.detect_faces(self.image_loaded, self.image_after_masking, self.detector)
+        self.faces = FaceDetector.detect_faces(self.image_after_masking, self.detector)
 
     def prepare_image_to_draw_on(self):
         image = cv2.imread(self.image_loaded.name)
@@ -147,7 +136,7 @@ class Application:
                                       self.print_allert_face_detected)
             self.write_person_name_on_face()
         self.image_after_masking = Display.draw_face_features(self.detection_mode, self.image_after_masking,
-                                                              self.faces, self.image_loaded,
+                                                              self.faces,
                                                               self.detection_mode_colors,
                                                               self.detection_mode_sizes,
                                                               self.face_mesh_mode)
@@ -177,15 +166,16 @@ class Application:
         elif self.masking_mode == ModeSelector.accurate_extract_face_features:
             self.image_after_masking = FaceFilter.run_face_cut_features2(self.image_after_masking)
 
-        elif self.masking_mode == ModeSelector.face_transform:
-            pass
+        #TODO
+        # elif self.masking_mode == ModeSelector.face_transform:
+        #    pass
         elif self.masking_mode == ModeSelector.extract_face_features_interpolation:
-            self.run_interpolation_mode(self.inerpolation_mode)
+            self.run_interpolation_mode(self.interpolation_mode)
             # self.image_after_masking = FaceFilter.run_face_filter_face_features_extraction_interpolation(
             #   self.image_loaded, self.image_after_masking, )
 
-    def run_interpolation_mode(self, inerpolation_mode):
-        right_eye, left_eye, nose, mouth = inerpolation_mode
+    def run_interpolation_mode(self, interpolation_mode):
+        right_eye, left_eye, nose, mouth = interpolation_mode
         if right_eye:
             self.image_after_masking = FaceFilter.run_face_filter_face_features_extraction_interpolation(
                 self.image_after_masking,
@@ -218,7 +208,7 @@ class Application:
             self.load_masking_mode()  # checkbox only
 
             if self.masking_mode == ModeSelector.extract_face_features_interpolation:
-                self.inerpolation_mode = ModeSelector.load_inerpolation_mode()  # todo change name
+                self.interpolation_mode = ModeSelector.load_interpolation_mode()  # todo change name
 
             self.run_masking_mode()
             self.detect_faces()
@@ -249,7 +239,7 @@ class Application:
             self.load_masking_mode()  # checkbox only
 
             if self.masking_mode == ModeSelector.extract_face_features_interpolation:
-                self.inerpolation_mode = ModeSelector.load_inerpolation_mode()  # todo change name
+                self.interpolation_mode = ModeSelector.load_interpolation_mode()  # todo change name
 
         self.enable_face_recognition()
         if self.is_face_recognition_enabled:
@@ -280,7 +270,7 @@ class Application:
                                                                              self.recognition_mode)  # per frame
 
                 images_after_masking.append(self.image_after_masking)
-                del self.image_after_masking     #
+                del self.image_after_masking  #
                 gc.collect()
 
             del frames
@@ -293,8 +283,6 @@ class Application:
                 image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                 cv2.imwrite('images\\img_' + str(index) + '.jpg', image_rgb)
 
-
-
             size = (images_after_masking[0].shape[1], images_after_masking[0].shape[0])
 
             out = cv2.VideoWriter('project.mp4', cv2.VideoWriter_fourcc(*'avc1'), 30, size)
@@ -306,4 +294,3 @@ class Application:
             video_file = open('project.mp4', 'rb')
             video_bytes = video_file.read()
             st.video(video_bytes)
-

@@ -4,13 +4,12 @@ import streamlit as st
 class Information:
     @staticmethod
     def print_main_page():
-
         col1, col2, col3 = st.columns(3)
         with col2:
             Information.print_information()
             Information.print_help()
-            st.image("test.jpg")
-
+            # st.image("author.jpg")
+            st.image("logo.jpg")
 
     @staticmethod
     def print_information():
@@ -63,7 +62,6 @@ class Information:
             
             """)
 
-
     @staticmethod
     def print_help():
         with st.expander(" 🔍 Help "):
@@ -87,10 +85,8 @@ class Information:
             
             """)
 
-
     @staticmethod
     def print_page_title():
         st.set_page_config(layout="wide")
         st.markdown("<h1 style='text-align: center'> Face biometric masking software </h1>",
                     unsafe_allow_html=True)
-
