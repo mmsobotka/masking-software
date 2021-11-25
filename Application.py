@@ -1,7 +1,9 @@
 import cv2.cv2
 import numpy as np
 import streamlit as st
-import ffmpeg
+import gc
+
+import skvideo.io
 
 import FaceFilter
 from Information import *
@@ -69,8 +71,6 @@ class Application:
 
         if program_mode == ModeSelector.upload_video:
             self.load_video_mode()
-            if self.video_loaded:
-                self.video = Display.load_video_on_sidebar(self.video_loaded)
 
         if self.image_loaded:
             self.run_application_image()
@@ -82,6 +82,7 @@ class Application:
         image_loaded = st.sidebar.file_uploader("Please select image to upload", type=['png', 'jpg', 'jpeg'],
                                                 key="upload_1")
         if image_loaded:
+            print("image loaded!")
             image = tempfile.NamedTemporaryFile(delete=False)
             image.write(image_loaded.read())
             self.image_loaded = image
@@ -89,7 +90,7 @@ class Application:
             self.print_allert_face_detected = True
 
     def load_video_mode(self):
-        video_loaded = st.sidebar.file_uploader("Please select image to upload", type=['mp4', 'mov'],
+        video_loaded = st.sidebar.file_uploader("Please select image to upload", type=['mp4', 'mov', 'avi'],
                                                 key="upload_video")
 
         if video_loaded:
@@ -164,17 +165,17 @@ class Application:
             pass
         elif self.masking_mode == ModeSelector.gaussian_filter:
             # FaceFilter.run_face_gausian_filter(self.faces, self.image_after_masking)
-            self.image_after_masking = FaceFilter.run_face_gausian_filter(self.image_loaded, self.image_after_masking,
+            self.image_after_masking = FaceFilter.run_face_gausian_filter(self.image_after_masking,
                                                                           self.masking_size,
                                                                           FaceFilter.face_without_forehead_chin_indices)
 
         elif self.masking_mode == ModeSelector.extract_face_features:
-            self.image_after_masking = FaceFilter.run_face_cut_features(self.image_loaded, self.image_after_masking,
+            self.image_after_masking = FaceFilter.run_face_cut_features(self.image_after_masking,
                                                                         FaceFilter.left_eye_indices)
-            self.image_after_masking = FaceFilter.run_face_cut_features(self.image_loaded, self.image_after_masking,
+            self.image_after_masking = FaceFilter.run_face_cut_features(self.image_after_masking,
                                                                         FaceFilter.right_eye_indices)
         elif self.masking_mode == ModeSelector.accurate_extract_face_features:
-            self.image_after_masking = FaceFilter.run_face_cut_features2(self.image_loaded, self.image_after_masking)
+            self.image_after_masking = FaceFilter.run_face_cut_features2(self.image_after_masking)
 
         elif self.masking_mode == ModeSelector.face_transform:
             pass
@@ -187,25 +188,21 @@ class Application:
         right_eye, left_eye, nose, mouth = inerpolation_mode
         if right_eye:
             self.image_after_masking = FaceFilter.run_face_filter_face_features_extraction_interpolation(
-                self.image_loaded,
                 self.image_after_masking,
                 self.masking_size,
                 FaceFilter.right_eye_indices)
         if left_eye:
             self.image_after_masking = FaceFilter.run_face_filter_face_features_extraction_interpolation(
-                self.image_loaded,
                 self.image_after_masking,
                 self.masking_size,
                 FaceFilter.left_eye_indices)
         if nose:
             self.image_after_masking = FaceFilter.run_face_filter_face_features_extraction_interpolation(
-                self.image_loaded,
                 self.image_after_masking,
                 self.masking_size,
                 FaceFilter.nose_indices)
         if mouth:
             self.image_after_masking = FaceFilter.run_face_filter_face_features_extraction_interpolation(
-                self.image_loaded,
                 self.image_after_masking,
                 self.masking_size,
                 FaceFilter.mouth_indices)
@@ -244,6 +241,7 @@ class Application:
         Display.view_image(self.image_after_masking)
 
     def run_application_video(self):
+
         self.enable_face_detection()  # checkbox only
         if self.is_face_detection_enabled:
             self.load_box_on_face_check_box()  # checkbox only
@@ -263,29 +261,13 @@ class Application:
                 # st.write(self.recognition_result)
 
         if self.is_face_detection_enabled and st.sidebar.button("play"):
-
-            frames = self.video
-            stframe = st.empty()
+            frames = Display.load_video(self.video_loaded)
             images_after_masking = []
-            # frames = [frames[0], frames[1]]
-
             my_bar = st.progress(0)
             n_frames = len(frames)
             percentage_per_frame = 100 / n_frames
 
-            frame_height, frame_width, _ = shape = frames[0].shape
-            width = 1280
-            scale_percent = (width / frame_width) * 100
-
-            print(scale_percent)
-            print(shape)
-            width = int(frames[0].shape[1] * scale_percent / 100)
-            height = int(frames[0].shape[0] * scale_percent / 100)
-            dim = (width, height)
-
             for index, frame in enumerate(frames):
-                frame = cv2.resize(frame, dim)
-
                 my_bar.progress(int(index * percentage_per_frame))
                 self.image_after_masking = frame
                 self.run_masking_mode()  # TODO interpolation mode creates new checkboxes
@@ -298,6 +280,30 @@ class Application:
                                                                              self.recognition_mode)  # per frame
 
                 images_after_masking.append(self.image_after_masking)
+                del self.image_after_masking     #
+                gc.collect()
 
-            for frame in images_after_masking:
-                stframe.image(frame)
+            del frames
+            del self.faces
+            del self.detector
+
+            gc.collect()
+
+            for index, image in enumerate(images_after_masking):
+                image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                cv2.imwrite('images\\img_' + str(index) + '.jpg', image_rgb)
+
+
+
+            size = (images_after_masking[0].shape[1], images_after_masking[0].shape[0])
+
+            out = cv2.VideoWriter('project.mp4', cv2.VideoWriter_fourcc(*'avc1'), 30, size)
+            for index, image in enumerate(images_after_masking):
+                img = cv2.imread('images\\img_' + str(index) + '.jpg')
+                out.write(img)
+            out.release()
+
+            video_file = open('project.mp4', 'rb')
+            video_bytes = video_file.read()
+            st.video(video_bytes)
+

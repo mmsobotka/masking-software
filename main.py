@@ -1,6 +1,7 @@
 from matplotlib.patches import Rectangle
 from matplotlib.patches import Circle
 from Application import *
+import gc
 
 
 class MyClass:
@@ -60,4 +61,5 @@ if __name__ == '__main__':
     application = Application()
     """---"""
     application.load_interface()
+    gc.collect()
 

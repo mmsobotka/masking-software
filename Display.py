@@ -4,7 +4,7 @@ import streamlit as st
 import cv2
 import face_recognition
 import mediapipe as mp
-
+import time
 
 class Display:
     @staticmethod
@@ -13,24 +13,57 @@ class Display:
         st.sidebar.image(image)
 
     @staticmethod
-    def load_video_on_sidebar(vid):
+    def load_video(vid):
+        print("load Video!")
         video = cv2.VideoCapture(vid.name)
-        stframe = st.sidebar.empty()
-
         frames = []
+
+
+        ret, frame = video.read()
+        max_width = 1000
+        max_height = 600
+        height, width, _ = frame.shape
+
+        scale_ratio_1 = height / max_height
+        scale_ratio_2 = width / max_width
+        scale_ratio = max(scale_ratio_1, scale_ratio_2)
+        scale_ratio = (1.0 / scale_ratio)
+
+        new_width = int(scale_ratio * width)
+        new_height = int(scale_ratio * height)
+        dim = (new_width, new_height)
+
         while video.isOpened():
             ret, frame = video.read()
             if not ret:
                 print("Can't receive frame - stream end.")
                 break
-            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            frames.append(rgb)
+            frame = cv2.resize(frame, dim)
+            frames.append(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 
-       # frames_to_run = []
-       # for index, frame in enumerate(frames):
-       #     if index % 3:
-       #         frames_to_run.append(frame)
+        time.sleep(10)
+        video.release()
 
+
+        # scale to smaller sizes
+        """
+        if len(frames) > 0:
+            max_width = 1000
+            max_height = 600
+            height, width, _ = frames[0].shape
+
+            scale_ratio_1 = height / max_height
+            scale_ratio_2 = width / max_width
+            scale_ratio = max(scale_ratio_1, scale_ratio_2)
+            scale_ratio = (1.0 / scale_ratio)
+
+            new_width = int(scale_ratio * width)
+            new_height = int(scale_ratio * height)
+            dim = (new_width, new_height)
+            for index, frame in enumerate(frames):
+                frames[index] = cv2.resize(frame, dim)
+                
+                """
         return frames
 
     @staticmethod
@@ -78,7 +111,7 @@ class Display:
                 cv2.circle(image_to_draw_on, value, int(size), color, int(size + 1))
 
     @staticmethod
-    def draw_lines_on_faces(image_loaded, image_to_draw_on, color, size):
+    def draw_lines_on_faces(image_to_draw_on, color, size):
         # use masked image instead of original
         # image = cv2.imread(image_loaded.name)
         # image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -102,7 +135,7 @@ class Display:
         return np.array(pil_image)
 
     @staticmethod
-    def draw_mesh_on_faces(image_loaded, image_to_draw_on, color, size, mesh_mode):
+    def draw_mesh_on_faces( image_to_draw_on, color, size, mesh_mode):
         """ TODO improve small faces on images"""
         # use masked image instead of original
         # image = cv2.imread(image_loaded.name)

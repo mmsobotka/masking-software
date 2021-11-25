@@ -14,7 +14,7 @@ class FaceFilter:
                                           127, 234, 93, 58, 138]
 
     @staticmethod
-    def get_mask_polygon_positions(image_loaded, image_to_draw_on, indices):
+    def get_mask_polygon_positions( image_to_draw_on, indices):
         mp_face_mesh = mp.solutions.face_mesh
         face_mesh = mp_face_mesh.FaceMesh(max_num_faces=5)
         results = face_mesh.process(image_to_draw_on)
@@ -29,22 +29,23 @@ class FaceFilter:
                 y = int(y * height)
                 polygon_positions.append([x, y])
 
+        del results #
         return polygon_positions
 
     @staticmethod
-    def get_mask_polygon(image_loaded, image_to_draw_on, indices):
-        polygon_positions = FaceFilter.get_mask_polygon_positions(image_loaded, image_to_draw_on, indices)
+    def get_mask_polygon( image_to_draw_on, indices):
+        polygon_positions = FaceFilter.get_mask_polygon_positions( image_to_draw_on, indices)
         if len(polygon_positions) == 0:
             return []
         mask_image = np.zeros(image_to_draw_on.shape[:2], np.uint8)
         cv2.fillPoly(mask_image, [np.array([polygon_positions], np.int32)], (255, 0, 0))
+        del polygon_positions #
         return mask_image
 
     @staticmethod
-    def run_face_gausian_filter(image_loaded, image_to_draw_on, size, indices):
-        image = image_to_draw_on.copy()
-        blur = cv2.blur(image, (int(size), int(size)))
-        mask = FaceFilter.get_mask_polygon(image_loaded, image_to_draw_on, indices)
+    def run_face_gausian_filter( image_to_draw_on, size, indices):
+        blur = cv2.blur(image_to_draw_on, (int(size), int(size)))
+        mask = FaceFilter.get_mask_polygon( image_to_draw_on, indices)
 
         #TODO remove this loop ( very slow )
         for y, row in enumerate(mask):
@@ -52,23 +53,29 @@ class FaceFilter:
                 if pixel:
                     image_to_draw_on[y, x] = blur[y, x]
 
+        del blur
+        mask.clear()
+        del mask
+
         return image_to_draw_on
 
     @staticmethod
-    def run_face_filter_face_features_extraction_interpolation(image_loaded, image_to_draw_on, size, indices):
-        mask = FaceFilter.get_mask_polygon(image_loaded, image_to_draw_on, indices)
+    def run_face_filter_face_features_extraction_interpolation( image_to_draw_on, size, indices):
+        mask = FaceFilter.get_mask_polygon( image_to_draw_on, indices)
         image_to_draw_on = cv2.inpaint(image_to_draw_on, mask, int(size), cv2.INPAINT_TELEA)
+        del mask
         return image_to_draw_on
 
     @staticmethod
-    def run_face_cut_features(image_loaded, image_to_draw_on, indices):
-        polygon_postions = FaceFilter.get_mask_polygon_positions(image_loaded, image_to_draw_on, indices)
+    def run_face_cut_features( image_to_draw_on, indices):
+        polygon_postions = FaceFilter.get_mask_polygon_positions( image_to_draw_on, indices)
         cv2.fillPoly(image_to_draw_on, [np.array([polygon_postions], np.int32)], (0, 0, 0))
+        del polygon_postions
         return image_to_draw_on
 
 
     @staticmethod
-    def run_face_cut_features2(image_loaded, image_to_draw_on):
+    def run_face_cut_features2(image_to_draw_on):
         face_landmark_list = face_recognition.face_landmarks(image_to_draw_on)
         print(face_landmark_list)
         for face_landmarks in face_landmark_list:
@@ -83,23 +90,34 @@ class FaceFilter:
             for i in range(12):
                 points = list(face_landmarks["top_lip"][i])
                 top_lip.append(points)
+                points.clear()
                 points = list(face_landmarks['bottom_lip'][i])
                 bottom_lip.append(points)
+                points.clear()
 
             for i in range(6):
                 points = list(face_landmarks['right_eye'][i])
                 right_eye.append(points)
+                points.clear()
                 points = list(face_landmarks['left_eye'][i])
                 left_eye.append(points)
+                points.clear()
 
             for i in range(5):
                 points = list(face_landmarks['nose_tip'][i])
                 nose_tip.append(points)
+                points.clear()
 
             cv2.fillPoly(image_to_draw_on, [np.array([top_lip], np.int32)], (0, 0, 0))
             cv2.fillPoly(image_to_draw_on, [np.array([bottom_lip], np.int32)], (0, 0, 0))
             cv2.fillPoly(image_to_draw_on, [np.array([right_eye], np.int32)], (0, 0, 0))
             cv2.fillPoly(image_to_draw_on, [np.array([left_eye], np.int32)], (0, 0, 0))
             cv2.fillPoly(image_to_draw_on, [np.array([nose_tip], np.int32)], (0, 0, 0))
+            top_lip.clear()
+            bottom_lip.clear()
+            right_eye.clear()
+            left_eye.clear()
+            nose_tip.clear()
 
+        face_landmark_list.clear()
         return image_to_draw_on
