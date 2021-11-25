@@ -19,8 +19,8 @@ class Display:
         frames = []
 
         ret, frame = video.read()
-        max_width = 1000
-        max_height = 600
+        max_width = 640
+        max_height = 480
         height, width, _ = frame.shape
 
         scale_ratio_1 = height / max_height
@@ -64,7 +64,8 @@ class Display:
             if len(faces) > 0:
                 st.sidebar.success("Face was detected!")
             else:
-                st.sidebar.error("Face wasn't detected!")
+                #st.sidebar.error("Face wasn't detected!")
+                pass
         for face in faces:
             x, y, width, height = face['box']
             cv2.rectangle(image_to_draw_on, (x, y), (x + width, y + height), color, 2)

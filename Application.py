@@ -61,11 +61,15 @@ class Application:
         if program_mode == ModeSelector.upload_video:
             self.load_video_mode()
 
+        if program_mode == ModeSelector.upload_live_camera:
+            self.run_application_camera()
+
         if self.image_loaded:
             self.run_application_image()
 
-        if self.video_loaded or self.camera_loaded:
+        if self.video_loaded:
             self.run_application_video()
+
 
     def load_image_mode(self):
         image_loaded = st.sidebar.file_uploader("Please select image to upload", type=['png', 'jpg', 'jpeg'],
@@ -231,7 +235,6 @@ class Application:
         Display.view_image(self.image_after_masking)
 
     def run_application_video(self):
-
         self.enable_face_detection()  # checkbox only
         if self.is_face_detection_enabled:
             self.load_box_on_face_check_box()  # checkbox only
@@ -260,7 +263,7 @@ class Application:
             for index, frame in enumerate(frames):
                 my_bar.progress(int(index * percentage_per_frame))
                 self.image_after_masking = frame
-                self.run_masking_mode()  # TODO interpolation mode creates new checkboxes
+                self.run_masking_mode()
                 self.detect_faces()
                 self.draw_on_image()  # per frame
 
@@ -279,18 +282,73 @@ class Application:
 
             gc.collect()
 
-            for index, image in enumerate(images_after_masking):
-                image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                cv2.imwrite('images\\img_' + str(index) + '.jpg', image_rgb)
+            self.save_video(images_after_masking)
+            self.load_video()
 
-            size = (images_after_masking[0].shape[1], images_after_masking[0].shape[0])
+    def run_application_camera(self):
+        print("run1")
+        self.enable_face_detection()  # checkbox only
+        if self.is_face_detection_enabled:
+            self.load_box_on_face_check_box()  # checkbox only
+            self.load_detection_mode()  # checkbox only
+            self.load_masking_mode()  # checkbox only
 
-            out = cv2.VideoWriter('project.mp4', cv2.VideoWriter_fourcc(*'avc1'), 30, size)
-            for index, image in enumerate(images_after_masking):
-                img = cv2.imread('images\\img_' + str(index) + '.jpg')
-                out.write(img)
-            out.release()
+            if self.masking_mode == ModeSelector.extract_face_features_interpolation:
+                self.interpolation_mode = ModeSelector.load_interpolation_mode()  # todo change name
 
-            video_file = open('project.mp4', 'rb')
-            video_bytes = video_file.read()
-            st.video(video_bytes)
+        self.enable_face_recognition()
+        print("run2")
+        if self.is_face_recognition_enabled:
+            self.load_image_to_learn_recognition_mode()  # file uploader only
+            if self.image_learn_recognition_loaded:
+                Display.load_image_on_sidebar(self.image_learn_recognition_loaded)  # ?
+                self.get_person_name()  # once
+                self.load_recognition_mode_check_box()  # checkbox only
+                # st.write(self.recognition_result)
+
+        if self.is_face_detection_enabled and st.sidebar.button("play"):
+            cam = cv2.VideoCapture(1)
+
+            stframe = st.empty()
+            while True:
+                ret, frame = cam.read()
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                print(frame.shape)
+
+                self.image_after_masking = frame
+                self.run_masking_mode()
+                self.detect_faces()
+                self.draw_on_image()  # per frame
+
+                if self.is_face_recognition_enabled:
+                    self.recognition_result = FaceRecognizer.recognize_faces(self.image_after_masking,
+                                                                             self.image_learn_recognition_loaded,
+                                                                             self.recognition_mode)  # per frame
+
+                gc.collect()
+
+
+                stframe.image(self.image_after_masking)
+
+
+    def save_video(self, images_after_masking):
+        for index, image in enumerate(images_after_masking):
+            image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            cv2.imwrite('images\\img_' + str(index) + '.jpg', image_rgb)
+
+        size = (images_after_masking[0].shape[1], images_after_masking[0].shape[0])
+
+        out = cv2.VideoWriter('project.mp4', cv2.VideoWriter_fourcc(*'avi1'), 30, size)
+        for index, image in enumerate(images_after_masking):
+            img = cv2.imread('images\\img_' + str(index) + '.jpg')
+            out.write(img)
+        out.release()
+
+    def load_video(self):
+        video_file = open('project.mp4', 'rb')
+        video_bytes = video_file.read()
+        st.video(video_bytes)
+
+
+
+
