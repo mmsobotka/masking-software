@@ -70,7 +70,6 @@ class Application:
         if self.video_loaded:
             self.run_application_video()
 
-
     def load_image_mode(self):
         image_loaded = st.sidebar.file_uploader("Please select image to upload", type=['png', 'jpg', 'jpeg'],
                                                 key="upload_1")
@@ -170,7 +169,7 @@ class Application:
         elif self.masking_mode == ModeSelector.accurate_extract_face_features:
             self.image_after_masking = FaceFilter.run_face_cut_features2(self.image_after_masking)
 
-        #TODO
+        # TODO
         # elif self.masking_mode == ModeSelector.face_transform:
         #    pass
         elif self.masking_mode == ModeSelector.extract_face_features_interpolation:
@@ -327,9 +326,7 @@ class Application:
 
                 gc.collect()
 
-
                 stframe.image(self.image_after_masking)
-
 
     def save_video(self, images_after_masking):
         for index, image in enumerate(images_after_masking):
@@ -338,7 +335,7 @@ class Application:
 
         size = (images_after_masking[0].shape[1], images_after_masking[0].shape[0])
 
-        out = cv2.VideoWriter('project.mp4', cv2.VideoWriter_fourcc(*'avi1'), 30, size)
+        out = cv2.VideoWriter('project.mp4', cv2.VideoWriter_fourcc(*'avc1'), 30, size)
         for index, image in enumerate(images_after_masking):
             img = cv2.imread('images\\img_' + str(index) + '.jpg')
             out.write(img)
@@ -348,7 +345,3 @@ class Application:
         video_file = open('project.mp4', 'rb')
         video_bytes = video_file.read()
         st.video(video_bytes)
-
-
-
-

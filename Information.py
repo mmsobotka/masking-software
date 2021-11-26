@@ -72,7 +72,7 @@ class Information:
             - From sidebar select option: Load Image, Load Video or Live Camera
             - For Load Image/ Load Video upload file for analysis, for Live Camera click "play"
             - Click "Face detection" to expand the available options
-            - To detect a face in the image, select "Check face detection"
+            - To detect a face in the image, select "Detect face"
             - Select method for mark facial features
             - Set biometric masking mode
             - Click "Face recognition" to upload file with known person, which will be used 
