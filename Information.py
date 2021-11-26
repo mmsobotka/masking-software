@@ -8,8 +8,9 @@ class Information:
         with col2:
             Information.print_information()
             Information.print_help()
-            # st.image("author.jpg")
-            st.image("logo.jpg")
+            Information.print_about()
+            st.image("logo_ibm.jpg")
+
 
     @staticmethod
     def print_information():
@@ -69,7 +70,7 @@ class Information:
 
 
             - From sidebar select option: Load Image, Load Video or Live Camera
-            - For Load Image/ Load Video upload file for analysis, for Live Camera click "Run"
+            - For Load Image/ Load Video upload file for analysis, for Live Camera click "play"
             - Click "Face detection" to expand the available options
             - To detect a face in the image, select "Check face detection"
             - Select method for mark facial features
@@ -80,6 +81,29 @@ class Information:
             - Enter the name of the person to be recognized
             - For Load Video mode select all the settings before clicking "play"
             - Test the effect of masking biometric features on face recognition and detection
+            
+            
+            
+            """)
+
+    @staticmethod
+    def print_about():
+        with st.expander(" 👋 About "):
+            st.write("""
+            
+            Face biometric masking software
+            
+                             Milena Sobotka
+                
+                  dr hab. inż. Jacek Rumiński, prof. PG
+            
+                     KATEDRA INŻYNIERII BIOMEDYCZNEJ 
+            
+                   Wydział Elektroniki, Telekomunikacji 
+                              i Informatyki
+            
+                            Politechnika Gdańska
+            
             
             
             

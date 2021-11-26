@@ -307,7 +307,7 @@ class Application:
                 # st.write(self.recognition_result)
 
         if self.is_face_detection_enabled and st.sidebar.button("play"):
-            cam = cv2.VideoCapture(1)
+            cam = cv2.VideoCapture(0)
 
             stframe = st.empty()
             while True:
