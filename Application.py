@@ -145,7 +145,9 @@ class Application:
                                                               self.face_mesh_mode)
 
     def write_person_name_on_face(self):
-        if self.recognition_result:
+        print("write_person_name_on_face")
+        if self.recognition_result is not None:
+            print("true")
             name = "UNKNOWN"
             if self.recognition_result > 40:
                 name = self.person_name + " " + str(self.recognition_result) + "%"
@@ -211,7 +213,7 @@ class Application:
             self.load_masking_mode()  # checkbox only
 
             if self.masking_mode == ModeSelector.extract_face_features_interpolation:
-                self.interpolation_mode = ModeSelector.load_interpolation_mode()  # todo change name
+                self.interpolation_mode = ModeSelector.load_interpolation_mode()
 
             self.run_masking_mode()
             self.detect_faces()
@@ -326,7 +328,7 @@ class Application:
 
                 gc.collect()
 
-                stframe.image(self.image_after_masking)
+                stframe.image(self.image_after_masking, use_column_width=True)
 
     def save_video(self, images_after_masking):
         for index, image in enumerate(images_after_masking):

@@ -66,6 +66,7 @@ class Display:
             else:
                 #st.sidebar.error("Face wasn't detected!")
                 pass
+
         for face in faces:
             x, y, width, height = face['box']
             cv2.rectangle(image_to_draw_on, (x, y), (x + width, y + height), color, 2)
