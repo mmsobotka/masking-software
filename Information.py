@@ -11,11 +11,11 @@ class Information:
             Information.print_about()
             st.image("logo_ibm.jpg")
 
-
     @staticmethod
     def print_information():
         with st.expander(" 💬 Information "):
-            st.write("""
+            st.write(
+                """
 
 
             -  Face Detection Methods 
@@ -61,12 +61,14 @@ class Information:
             Dlib - Facial Landmark 
             
             
-            """)
+            """
+            )
 
     @staticmethod
     def print_help():
         with st.expander(" 🔍 Help "):
-            st.write("""        
+            st.write(
+                """        
 
 
             - From sidebar select option: Load Image, Load Video or Live Camera
@@ -84,12 +86,14 @@ class Information:
             
             
             
-            """)
+            """
+            )
 
     @staticmethod
     def print_about():
         with st.expander(" 👋 About "):
-            st.write("""
+            st.write(
+                """
             
             Face biometric masking software
             
@@ -107,10 +111,13 @@ class Information:
             
             
             
-            """)
+            """
+            )
 
     @staticmethod
     def print_page_title():
         st.set_page_config(layout="wide")
-        st.markdown("<h1 style='text-align: center'> Face biometric masking software </h1>",
-                    unsafe_allow_html=True)
+        st.markdown(
+            "<h1 style='text-align: center'> Face biometric masking software </h1>",
+            unsafe_allow_html=True,
+        )

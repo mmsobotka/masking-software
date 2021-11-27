@@ -1,10 +1,13 @@
 import cv2.cv2
 import gc
 import FaceFilter
-from Information import *
-from FaceDetector import *
-from FaceFilter import *
-from FaceRecognizer import *
+import streamlit as st
+from Information import Information
+from FaceDetector import FaceDetector
+from FaceFilter import FaceFilter
+from FaceRecognizer import FaceRecognizer
+from ModeSelector import ModeSelector
+from Display import Display
 import tempfile
 from mtcnn.mtcnn import MTCNN
 
@@ -18,6 +21,7 @@ from mtcnn.mtcnn import MTCNN
 # check if hog and cnn recognition mode works correctly
 # p2 in cut face features user should chose what to cut
 # reload with change main mode
+
 
 class Application:
     image_loaded = None
@@ -71,8 +75,9 @@ class Application:
             self.run_application_video()
 
     def load_image_mode(self):
-        image_loaded = st.sidebar.file_uploader("Please select image to upload", type=['png', 'jpg', 'jpeg'],
-                                                key="upload_1")
+        image_loaded = st.sidebar.file_uploader(
+            "Please select image to upload", type=["png", "jpg", "jpeg"], key="upload_1"
+        )
         if image_loaded:
             print("image loaded!")
             image = tempfile.NamedTemporaryFile(delete=False)
@@ -82,8 +87,11 @@ class Application:
             self.print_allert_face_detected = True
 
     def load_video_mode(self):
-        video_loaded = st.sidebar.file_uploader("Please select image to upload", type=['mp4', 'mov', 'avi'],
-                                                key="upload_video")
+        video_loaded = st.sidebar.file_uploader(
+            "Please select image to upload",
+            type=["mp4", "mov", "avi"],
+            key="upload_video",
+        )
 
         if video_loaded:
             video = tempfile.NamedTemporaryFile(delete=False)
@@ -92,16 +100,21 @@ class Application:
             self.print_allert_face_detected = False
 
     def load_image_to_learn_recognition_mode(self):
-        image_loaded = st.sidebar.file_uploader("Please select image to upload", type=['png', 'jpg', 'jpeg'],
-                                                key="upload_2")
+        image_loaded = st.sidebar.file_uploader(
+            "Please select image to upload", type=["png", "jpg", "jpeg"], key="upload_2"
+        )
         if image_loaded:
             image = tempfile.NamedTemporaryFile(delete=False)
             image.write(image_loaded.read())
             self.image_learn_recognition_loaded = image
 
     def load_detection_mode(self):
-        (self.detection_mode), (self.detection_mode_colors), (
-            self.detection_mode_sizes), self.face_mesh_mode = ModeSelector.load_detection_mode()
+        (
+            (self.detection_mode),
+            (self.detection_mode_colors),
+            (self.detection_mode_sizes),
+            self.face_mesh_mode,
+        ) = ModeSelector.load_detection_mode()
 
     def load_masking_mode(self):
         mask_mode, size = ModeSelector.load_mask_mode()
@@ -135,14 +148,21 @@ class Application:
 
     def draw_on_image(self):
         if self.box_on_faces:
-            Display.draw_box_on_faces(self.faces, self.image_after_masking, (255, 0, 0),
-                                      self.print_allert_face_detected)
+            Display.draw_box_on_faces(
+                self.faces,
+                self.image_after_masking,
+                (255, 0, 0),
+                self.print_allert_face_detected,
+            )
             self.write_person_name_on_face()
-        self.image_after_masking = Display.draw_face_features(self.detection_mode, self.image_after_masking,
-                                                              self.faces,
-                                                              self.detection_mode_colors,
-                                                              self.detection_mode_sizes,
-                                                              self.face_mesh_mode)
+        self.image_after_masking = Display.draw_face_features(
+            self.detection_mode,
+            self.image_after_masking,
+            self.faces,
+            self.detection_mode_colors,
+            self.detection_mode_sizes,
+            self.face_mesh_mode,
+        )
 
     def write_person_name_on_face(self):
         print("write_person_name_on_face")
@@ -151,25 +171,35 @@ class Application:
             name = "UNKNOWN"
             if self.recognition_result > 40:
                 name = self.person_name + " " + str(self.recognition_result) + "%"
-            Display.draw_rectangle_under_faces(self.faces, self.image_after_masking, (255, 0, 0))
-            Display.write_names_under_faces(self.faces, self.image_after_masking, (255, 255, 255), name)
+            Display.draw_rectangle_under_faces(
+                self.faces, self.image_after_masking, (255, 0, 0)
+            )
+            Display.write_names_under_faces(
+                self.faces, self.image_after_masking, (255, 255, 255), name
+            )
 
     def run_masking_mode(self):
         if self.masking_mode == ModeSelector.default:
             pass
         elif self.masking_mode == ModeSelector.gaussian_filter:
             # FaceFilter.run_face_gausian_filter(self.faces, self.image_after_masking)
-            self.image_after_masking = FaceFilter.run_face_gausian_filter(self.image_after_masking,
-                                                                          self.masking_size,
-                                                                          FaceFilter.face_without_forehead_chin_indices)
+            self.image_after_masking = FaceFilter.run_face_gausian_filter(
+                self.image_after_masking,
+                self.masking_size,
+                FaceFilter.face_without_forehead_chin_indices,
+            )
 
         elif self.masking_mode == ModeSelector.extract_face_features:
-            self.image_after_masking = FaceFilter.run_face_cut_features(self.image_after_masking,
-                                                                        FaceFilter.left_eye_indices)
-            self.image_after_masking = FaceFilter.run_face_cut_features(self.image_after_masking,
-                                                                        FaceFilter.right_eye_indices)
+            self.image_after_masking = FaceFilter.run_face_cut_features(
+                self.image_after_masking, FaceFilter.left_eye_indices
+            )
+            self.image_after_masking = FaceFilter.run_face_cut_features(
+                self.image_after_masking, FaceFilter.right_eye_indices
+            )
         elif self.masking_mode == ModeSelector.accurate_extract_face_features:
-            self.image_after_masking = FaceFilter.run_face_cut_features2(self.image_after_masking)
+            self.image_after_masking = FaceFilter.run_face_cut_features2(
+                self.image_after_masking
+            )
 
         # TODO
         # elif self.masking_mode == ModeSelector.face_transform:
@@ -182,25 +212,35 @@ class Application:
     def run_interpolation_mode(self, interpolation_mode):
         right_eye, left_eye, nose, mouth = interpolation_mode
         if right_eye:
-            self.image_after_masking = FaceFilter.run_face_filter_face_features_extraction_interpolation(
-                self.image_after_masking,
-                self.masking_size,
-                FaceFilter.right_eye_indices)
+            self.image_after_masking = (
+                FaceFilter.run_face_filter_face_features_extraction_interpolation(
+                    self.image_after_masking,
+                    self.masking_size,
+                    FaceFilter.right_eye_indices,
+                )
+            )
         if left_eye:
-            self.image_after_masking = FaceFilter.run_face_filter_face_features_extraction_interpolation(
-                self.image_after_masking,
-                self.masking_size,
-                FaceFilter.left_eye_indices)
+            self.image_after_masking = (
+                FaceFilter.run_face_filter_face_features_extraction_interpolation(
+                    self.image_after_masking,
+                    self.masking_size,
+                    FaceFilter.left_eye_indices,
+                )
+            )
         if nose:
-            self.image_after_masking = FaceFilter.run_face_filter_face_features_extraction_interpolation(
-                self.image_after_masking,
-                self.masking_size,
-                FaceFilter.nose_indices)
+            self.image_after_masking = (
+                FaceFilter.run_face_filter_face_features_extraction_interpolation(
+                    self.image_after_masking, self.masking_size, FaceFilter.nose_indices
+                )
+            )
         if mouth:
-            self.image_after_masking = FaceFilter.run_face_filter_face_features_extraction_interpolation(
-                self.image_after_masking,
-                self.masking_size,
-                FaceFilter.mouth_indices)
+            self.image_after_masking = (
+                FaceFilter.run_face_filter_face_features_extraction_interpolation(
+                    self.image_after_masking,
+                    self.masking_size,
+                    FaceFilter.mouth_indices,
+                )
+            )
 
     def get_person_name(self):
         self.person_name = Display.get_person_name_label()
@@ -225,9 +265,11 @@ class Application:
                 Display.load_image_on_sidebar(self.image_learn_recognition_loaded)
                 self.get_person_name()
                 self.load_recognition_mode_check_box()
-                self.recognition_result = FaceRecognizer.recognize_faces(self.image_after_masking,
-                                                                         self.image_learn_recognition_loaded,
-                                                                         self.recognition_mode)
+                self.recognition_result = FaceRecognizer.recognize_faces(
+                    self.image_after_masking,
+                    self.image_learn_recognition_loaded,
+                    self.recognition_mode,
+                )
                 # st.write(self.recognition_result)
 
         if self.is_face_detection_enabled:
@@ -243,7 +285,9 @@ class Application:
             self.load_masking_mode()  # checkbox only
 
             if self.masking_mode == ModeSelector.extract_face_features_interpolation:
-                self.interpolation_mode = ModeSelector.load_interpolation_mode()  # todo change name
+                self.interpolation_mode = (
+                    ModeSelector.load_interpolation_mode()
+                )  # todo change name
 
         self.enable_face_recognition()
         if self.is_face_recognition_enabled:
@@ -269,9 +313,11 @@ class Application:
                 self.draw_on_image()  # per frame
 
                 if self.is_face_recognition_enabled:
-                    self.recognition_result = FaceRecognizer.recognize_faces(self.image_after_masking,
-                                                                             self.image_learn_recognition_loaded,
-                                                                             self.recognition_mode)  # per frame
+                    self.recognition_result = FaceRecognizer.recognize_faces(
+                        self.image_after_masking,
+                        self.image_learn_recognition_loaded,
+                        self.recognition_mode,
+                    )  # per frame
 
                 images_after_masking.append(self.image_after_masking)
                 del self.image_after_masking  #
@@ -295,7 +341,9 @@ class Application:
             self.load_masking_mode()  # checkbox only
 
             if self.masking_mode == ModeSelector.extract_face_features_interpolation:
-                self.interpolation_mode = ModeSelector.load_interpolation_mode()  # todo change name
+                self.interpolation_mode = (
+                    ModeSelector.load_interpolation_mode()
+                )  # todo change name
 
         self.enable_face_recognition()
         print("run2")
@@ -322,9 +370,11 @@ class Application:
                 self.draw_on_image()  # per frame
 
                 if self.is_face_recognition_enabled:
-                    self.recognition_result = FaceRecognizer.recognize_faces(self.image_after_masking,
-                                                                             self.image_learn_recognition_loaded,
-                                                                             self.recognition_mode)  # per frame
+                    self.recognition_result = FaceRecognizer.recognize_faces(
+                        self.image_after_masking,
+                        self.image_learn_recognition_loaded,
+                        self.recognition_mode,
+                    )  # per frame
 
                 gc.collect()
 
@@ -333,17 +383,17 @@ class Application:
     def save_video(self, images_after_masking):
         for index, image in enumerate(images_after_masking):
             image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            cv2.imwrite('images\\img_' + str(index) + '.jpg', image_rgb)
+            cv2.imwrite("images\\img_" + str(index) + ".jpg", image_rgb)
 
         size = (images_after_masking[0].shape[1], images_after_masking[0].shape[0])
 
-        out = cv2.VideoWriter('project.mp4', cv2.VideoWriter_fourcc(*'avc1'), 30, size)
+        out = cv2.VideoWriter("project.mp4", cv2.VideoWriter_fourcc(*"avc1"), 30, size)
         for index, image in enumerate(images_after_masking):
-            img = cv2.imread('images\\img_' + str(index) + '.jpg')
+            img = cv2.imread("images\\img_" + str(index) + ".jpg")
             out.write(img)
         out.release()
 
     def load_video(self):
-        video_file = open('project.mp4', 'rb')
+        video_file = open("project.mp4", "rb")
         video_bytes = video_file.read()
         st.video(video_bytes)
