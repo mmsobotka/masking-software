@@ -1,4 +1,4 @@
-from Application import *
+from Application import Application
 import gc
 
 if __name__ == "__main__":
