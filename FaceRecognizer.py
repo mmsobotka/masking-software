@@ -1,4 +1,5 @@
-from ModeSelector import *
+from ModeSelector import ModeSelector
+import face_recognition
 
 
 class FaceRecognizer:
@@ -42,4 +43,3 @@ class FaceRecognizer:
             recognized_distance = recognized_distance[0]
 
         recognized_distance = int((1 - recognized_distance) * 100)
-        return recognized_distance
