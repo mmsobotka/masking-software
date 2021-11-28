@@ -1,12 +1,9 @@
 import cv2.cv2
 import gc
 
-import EnumModeSelector
-import FaceFilter
 import streamlit as st
 from Information import Information
 from FaceDetector import FaceDetector
-from FaceFilter import FaceFilter
 from FaceRecognizer import FaceRecognizer
 from ModeSelector import ModeSelector
 from Display import Display

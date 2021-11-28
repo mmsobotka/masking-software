@@ -4,7 +4,6 @@ import streamlit as st
 import cv2
 import face_recognition
 import mediapipe as mp
-import dlib
 from FaceDetector import FaceDetector
 
 
