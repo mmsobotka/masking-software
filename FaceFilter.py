@@ -5,12 +5,118 @@ import face_recognition
 
 
 class FaceFilter:
-    right_eye_indices = [342, 445, 444, 443, 442, 441, 413, 464, 453, 452, 451, 450, 449, 448, 261, 446]
-    left_eye_indices = [189, 244, 233, 232, 231, 230, 229, 228, 31, 226, 113, 225, 224, 223, 222, 221]
-    mouth_indices = [37, 0, 267, 269, 410, 287, 273, 405, 314, 17, 84, 181, 57, 58, 212, 39,]
+    right_eye_indices = [
+        342,
+        445,
+        444,
+        443,
+        442,
+        441,
+        413,
+        464,
+        453,
+        452,
+        451,
+        450,
+        449,
+        448,
+        261,
+        446,
+    ]
+    left_eye_indices = [
+        189,
+        244,
+        233,
+        232,
+        231,
+        230,
+        229,
+        228,
+        31,
+        226,
+        113,
+        225,
+        224,
+        223,
+        222,
+        221,
+    ]
+    mouth_indices = [
+        37,
+        0,
+        267,
+        269,
+        410,
+        287,
+        273,
+        405,
+        314,
+        17,
+        84,
+        181,
+        57,
+        58,
+        212,
+        39,
+    ]
     # nose_indices = [413, 465, 412, 399, 456, 363, 440, 457, 458, 354, 19, 125, 238, 44, 45, 236, 174, 188, 122]
-    nose_indices = [412, 437, 429, 279, 358, 294, 460, 326, 2, 97, 240, 219, 430, 49, 115, 120, 47, 188]
-    face_without_forehead_chin_indices = [135, 169, 170, 140, 171, 175, 396, 369, 395, 394, 364, 367, 288, 361, 323, 454, 356, 389, 251, 284, 333, 299, 337, 151, 108, 69, 104, 68, 21, 162, 127, 234, 93, 58, 138]
+    nose_indices = [
+        412,
+        437,
+        429,
+        279,
+        358,
+        294,
+        460,
+        326,
+        2,
+        97,
+        240,
+        219,
+        430,
+        49,
+        115,
+        120,
+        47,
+        188,
+    ]
+    face_without_forehead_chin_indices = [
+        135,
+        169,
+        170,
+        140,
+        171,
+        175,
+        396,
+        369,
+        395,
+        394,
+        364,
+        367,
+        288,
+        361,
+        323,
+        454,
+        356,
+        389,
+        251,
+        284,
+        333,
+        299,
+        337,
+        151,
+        108,
+        69,
+        104,
+        68,
+        21,
+        162,
+        127,
+        234,
+        93,
+        58,
+        138,
+    ]
 
     @staticmethod
     def get_mask_polygon_positions(image_to_draw_on, indices):
@@ -125,3 +231,38 @@ class FaceFilter:
 
         face_landmark_list.clear()
         return image_to_draw_on
+
+    @staticmethod
+    def run_interpolation_mode(image_after_masking, masking_size, interpolation_mode):
+        right_eye, left_eye, nose, mouth = interpolation_mode
+        if right_eye:
+            image_after_masking = (
+                FaceFilter.run_face_filter_face_features_extraction_interpolation(
+                    image_after_masking,
+                    masking_size,
+                    FaceFilter.right_eye_indices,
+                )
+            )
+        if left_eye:
+            image_after_masking = (
+                FaceFilter.run_face_filter_face_features_extraction_interpolation(
+                    image_after_masking,
+                    masking_size,
+                    FaceFilter.left_eye_indices,
+                )
+            )
+        if nose:
+            image_after_masking = (
+                FaceFilter.run_face_filter_face_features_extraction_interpolation(
+                    image_after_masking, masking_size, FaceFilter.nose_indices
+                )
+            )
+        if mouth:
+            image_after_masking = (
+                FaceFilter.run_face_filter_face_features_extraction_interpolation(
+                    image_after_masking,
+                    masking_size,
+                    FaceFilter.mouth_indices,
+                )
+            )
+        return image_after_masking

@@ -4,6 +4,8 @@ import streamlit as st
 import cv2
 import face_recognition
 import mediapipe as mp
+import dlib
+from FaceDetector import FaceDetector
 
 
 class Display:
@@ -54,8 +56,8 @@ class Display:
         return ImageColor.getcolor(color, "RGB")
 
     @staticmethod
-    def get_slider_size(key, max=8.0):
-        size = st.sidebar.slider("Select size", 1.0, max, 1.0, key=key)
+    def get_slider_size(key, max_value=8.0):
+        size = st.sidebar.slider("Select size", 1.0, max_value, 1.0, key=key)
         return size
 
     @staticmethod
@@ -66,7 +68,6 @@ class Display:
             else:
                 # st.sidebar.error("Face wasn't detected!")
                 pass
-
         for face in faces:
             x, y, width, height = face["box"]
             cv2.rectangle(image_to_draw_on, (x, y), (x + width, y + height), color, 2)
@@ -102,6 +103,19 @@ class Display:
         for face in faces:
             for key, value in face["keypoints"].items():
                 cv2.circle(image_to_draw_on, value, int(size), color, int(size + 1))
+
+    @staticmethod
+    def draw_68_points_on_faces(image_to_draw_on, color, size, landmark_detector):
+        faces = FaceDetector.detect_faces_dlib(image_to_draw_on)
+        landmark_tuple = []
+        for k, d in enumerate(faces):
+            landmarks = landmark_detector(image_to_draw_on, d)
+            for n in range(0, 68):
+                x = landmarks.part(n).x
+                y = landmarks.part(n).y
+                landmark_tuple.append((x, y))
+                cv2.circle(image_to_draw_on, (x, y), int(size), color, -1)
+        return image_to_draw_on
 
     @staticmethod
     def draw_lines_on_faces(image_to_draw_on, color, size):
@@ -151,15 +165,25 @@ class Display:
         detection_mode_colors=None,
         detection_mode_sizes=None,
         detection_mode_mesh=None,
+        landmark_detector=None
     ):
 
-        is_points_selected, is_lines_selected, is_mesh_selected = detection_mode
-        points_color, lines_color, mesh_color = detection_mode_colors
-        points_size, lines_size, mesh_size = detection_mode_sizes
+        (
+            is_points_selected,
+            is_points_dlib_selected,
+            is_lines_selected,
+            is_mesh_selected,
+        ) = detection_mode
+        points_color, points_dlib_color, lines_color, mesh_color = detection_mode_colors
+        points_size, points_dlib_size, lines_size, mesh_size = detection_mode_sizes
 
         if is_points_selected:
             Display.draw_points_on_faces(
                 faces, image_to_draw_on, points_color, points_size
+            )
+        if is_points_dlib_selected:
+            Display.draw_68_points_on_faces(
+                image_to_draw_on, points_dlib_color, points_dlib_size, landmark_detector
             )
         if is_mesh_selected:
             Display.draw_mesh_on_faces(
@@ -176,3 +200,17 @@ class Display:
     def get_person_name_label():
         name = st.sidebar.text_input("Person name", " ")
         return name
+
+    @staticmethod
+    def write_person_name_on_face(
+        recognition_result, faces, image_after_masking, person_name
+    ):
+        if recognition_result is not None:
+            name = "UNKNOWN"
+            if recognition_result > 40:
+                name = person_name + " " + str(recognition_result) + "%"
+            Display.draw_rectangle_under_faces(faces, image_after_masking, (255, 0, 0))
+            Display.write_names_under_faces(
+                faces, image_after_masking, (255, 255, 255), name
+            )
+        return image_after_masking

@@ -2,44 +2,44 @@ from Display import Display
 import mediapipe as mp
 import streamlit as st
 
+from EnumModeSelector import UploadMode
+from EnumModeSelector import FaceDetectionMode
+from EnumModeSelector import MaskingOption
+from EnumModeSelector import MeshMode
+
 
 class ModeSelector:
-    upload_default = "Mode Selection"
-    upload_image = "Load Image"
-    upload_video = "Load Video"
-    upload_live_camera = "Live Camera"
-    cnn_mode = "CNN"
-    hog_mode = "HOG"
-    # lbph_mode = "LBPH"
-    mesh_points_mode = "mesh with points"
-    mesh_contours_mode = "mesh with contours"
-    mesh_triangles_mode = "mesh with triangles"
-
-    sidebar_options = [upload_default, upload_image, upload_video, upload_live_camera]
-    default = "No mask"
-    gaussian_filter = "Gaussian filter"
-    extract_face_features = "Cut features"
-    accurate_extract_face_features = "Accurate cut features"
-    # face_transform = "Face transform"
-    extract_face_features_interpolation = "Interpolation features"
+    sidebar_options = [
+        UploadMode.upload_default,
+        UploadMode.upload_image,
+        UploadMode.upload_video,
+        UploadMode.upload_live_camera,
+    ]
 
     @staticmethod
     def load_detection_mode():
         points_color = None
+        points_dlib_color = None
         lines_color = None
         mesh_color = None
 
         points_size = None
+        points_dlib_size = None
         lines_size = None
         mesh_size = None
 
         face_mesh_mode = None
 
         st.sidebar.write("Set face features as:")
-        points = st.sidebar.checkbox("points")
+        points = st.sidebar.checkbox("5 points")
         if points:
             points_color = Display.get_color("points")
             points_size = Display.get_slider_size("points")
+
+        points_dlib = st.sidebar.checkbox("68 points")
+        if points_dlib:
+            points_dlib_color = Display.get_color("points")
+            points_dlib_size = Display.get_slider_size("points")
 
         lines = st.sidebar.checkbox("lines")
         if lines:
@@ -53,9 +53,9 @@ class ModeSelector:
             mesh_size = Display.get_slider_size("mesh")
 
         return (
-            (points, lines, mesh),
-            (points_color, lines_color, mesh_color),
-            (points_size, lines_size, mesh_size),
+            (points, points_dlib, lines, mesh),
+            (points_color, points_dlib_color, lines_color, mesh_color),
+            (points_size, points_dlib_size, lines_size, mesh_size),
             face_mesh_mode,
         )
 
@@ -63,7 +63,7 @@ class ModeSelector:
     def load_recognition_mode_check_box():
         face_recognition_mode = st.sidebar.radio(
             "Select mode for face recognition",
-            (ModeSelector.cnn_mode, ModeSelector.hog_mode),
+            (FaceDetectionMode.cnn, FaceDetectionMode.hog),
         )  # ModeSelector.lbph_mode))
         return face_recognition_mode
 
@@ -71,20 +71,20 @@ class ModeSelector:
     def load_mask_mode():
         filtration_size = None
         masking_sidebar_options = [
-            ModeSelector.default,
-            ModeSelector.gaussian_filter,
-            ModeSelector.extract_face_features,
-            ModeSelector.accurate_extract_face_features,
-            # ModeSelector.face_transform,
-            ModeSelector.extract_face_features_interpolation,
+            MaskingOption.default,
+            MaskingOption.gaussian_filter,
+            MaskingOption.extract_face_features,
+            MaskingOption.accurate_extract_face_features,
+            # MaskingOption.face_transform,
+            MaskingOption.extract_face_features_interpolation,
         ]
         mask_mode = st.sidebar.selectbox(
             "Set masking method as:", masking_sidebar_options
         )
-        if mask_mode == ModeSelector.gaussian_filter:
-            filtration_size = Display.get_slider_size("Size", max=60.0)
-        if mask_mode == ModeSelector.extract_face_features_interpolation:
-            filtration_size = Display.get_slider_size("Size", max=30.0)
+        if mask_mode == MaskingOption.gaussian_filter:
+            filtration_size = Display.get_slider_size("Size", max_value=60.0)
+        if mask_mode == MaskingOption.extract_face_features_interpolation:
+            filtration_size = Display.get_slider_size("Size", max_value=30.0)
         return mask_mode, filtration_size
 
     @staticmethod
@@ -102,16 +102,16 @@ class ModeSelector:
         mesh_mode = st.sidebar.radio(
             "Set face mesh mode method as",
             (
-                ModeSelector.mesh_points_mode,
-                ModeSelector.mesh_contours_mode,
-                ModeSelector.mesh_triangles_mode,
+                MeshMode.mesh_points,
+                MeshMode.mesh_contours,
+                MeshMode.mesh_triangles,
             ),
         )
-        if mesh_mode == ModeSelector.mesh_points_mode:
+        if mesh_mode == MeshMode.mesh_points:
             return mp_face_mesh.FACEMESH_FACE_OVAL
-        if mesh_mode == ModeSelector.mesh_triangles_mode:
+        if mesh_mode == MeshMode.mesh_triangles:
             return mp_face_mesh.FACEMESH_TESSELATION
-        if mesh_mode == ModeSelector.mesh_contours_mode:
+        if mesh_mode == MeshMode.mesh_contours:
             return mp_face_mesh.FACEMESH_CONTOURS
 
     @staticmethod

@@ -1,15 +1,15 @@
-from ModeSelector import ModeSelector
 import face_recognition
+from EnumModeSelector import FaceDetectionMode
 
 
 class FaceRecognizer:
     @staticmethod
     def recognize_faces(unknown_image, model_image, mode):
-        if mode == ModeSelector.cnn_mode:
+        if mode == FaceDetectionMode.cnn:
             return FaceRecognizer.face_recognition_function(
                 unknown_image, model_image, mode
             )
-        elif mode == ModeSelector.hog_mode:
+        elif mode == FaceDetectionMode.hog:
             return FaceRecognizer.face_recognition_function(
                 unknown_image, model_image, mode
             )
@@ -43,3 +43,4 @@ class FaceRecognizer:
             recognized_distance = recognized_distance[0]
 
         recognized_distance = int((1 - recognized_distance) * 100)
+        return recognized_distance
