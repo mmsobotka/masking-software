@@ -33,6 +33,6 @@ class MaskingModeHelper:
             image_after_masking = FaceFilter.run_interpolation_mode(
                 image_after_masking, masking_size, interpolation_mode
             )
-            # self.image_after_masking = FaceFilter.run_face_filter_face_features_extraction_interpolation(
+            # self.image_after_masking = FaceFilter.run_face_features_extraction_interpolation(
             #   self.image_loaded, self.image_after_masking, )
         return image_after_masking

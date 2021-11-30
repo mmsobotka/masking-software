@@ -61,7 +61,7 @@ class FaceFilter:
         return image_to_draw_on
 
     @staticmethod
-    def run_face_filter_face_features_extraction_interpolation(
+    def run_face_features_extraction_interpolation(
             image_to_draw_on, size, indices
     ):
         mask = FaceFilter.get_mask_polygon(image_to_draw_on, indices)
@@ -132,7 +132,7 @@ class FaceFilter:
         right_eye, left_eye, nose, mouth = interpolation_mode
         if right_eye:
             image_after_masking = (
-                FaceFilter.run_face_filter_face_features_extraction_interpolation(
+                FaceFilter.run_face_features_extraction_interpolation(
                     image_after_masking,
                     masking_size,
                     FaceFilter.right_eye_indices,
@@ -140,7 +140,7 @@ class FaceFilter:
             )
         if left_eye:
             image_after_masking = (
-                FaceFilter.run_face_filter_face_features_extraction_interpolation(
+                FaceFilter.run_face_features_extraction_interpolation(
                     image_after_masking,
                     masking_size,
                     FaceFilter.left_eye_indices,
@@ -148,13 +148,13 @@ class FaceFilter:
             )
         if nose:
             image_after_masking = (
-                FaceFilter.run_face_filter_face_features_extraction_interpolation(
+                FaceFilter.run_face_features_extraction_interpolation(
                     image_after_masking, masking_size, FaceFilter.nose_indices
                 )
             )
         if mouth:
             image_after_masking = (
-                FaceFilter.run_face_filter_face_features_extraction_interpolation(
+                FaceFilter.run_face_features_extraction_interpolation(
                     image_after_masking,
                     masking_size,
                     FaceFilter.mouth_indices,

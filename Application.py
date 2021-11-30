@@ -26,6 +26,7 @@ import dlib
 # check if hog and cnn recognition mode works correctly
 # p2 in cut face features user should chose what to cut
 # reload with change main mode
+# SAVE TO FILE P0 ASAP !!!!
 
 
 class Application:

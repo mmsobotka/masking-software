@@ -131,4 +131,4 @@ class ModeSelector:
 
     @staticmethod
     def load_box_on_face_check_box():
-        return st.sidebar.checkbox("Detect face")
+        return st.sidebar.checkbox("draw box on face")
