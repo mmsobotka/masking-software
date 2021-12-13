@@ -2,6 +2,10 @@ import streamlit as st
 
 
 class Information:
+    """
+    Information class is used to display the main panel containing
+    information about the author, the used methods and help.
+    """
     @staticmethod
     def print_main_page():
         col1, col2, col3 = st.columns(3)

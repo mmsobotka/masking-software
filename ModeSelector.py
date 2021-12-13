@@ -9,6 +9,10 @@ from EnumModeSelector import MeshMode
 
 
 class ModeSelector:
+    """
+    ModeSelector class is an interface between the user and the system
+    that captures the options selected by the user at application runtime.
+    """
     sidebar_options = [
         UploadMode.upload_default,
         UploadMode.upload_image,
@@ -38,8 +42,8 @@ class ModeSelector:
 
         points_dlib = st.sidebar.checkbox("68 points")
         if points_dlib:
-            points_dlib_color = Display.get_color("points")
-            points_dlib_size = Display.get_slider_size("points")
+            points_dlib_color = Display.get_color("points_dlib")
+            points_dlib_size = Display.get_slider_size("points_dlib")
 
         lines = st.sidebar.checkbox("lines")
         if lines:
@@ -64,7 +68,7 @@ class ModeSelector:
         face_recognition_mode = st.sidebar.radio(
             "Select mode for face recognition",
             (FaceDetectionMode.cnn, FaceDetectionMode.hog),
-        )  # ModeSelector.lbph_mode))
+        )
         return face_recognition_mode
 
     @staticmethod
@@ -75,7 +79,6 @@ class ModeSelector:
             MaskingOption.gaussian_filter,
             MaskingOption.extract_face_features,
             MaskingOption.accurate_extract_face_features,
-            # MaskingOption.face_transform,
             MaskingOption.extract_face_features_interpolation,
         ]
         mask_mode = st.sidebar.selectbox(
@@ -131,4 +134,4 @@ class ModeSelector:
 
     @staticmethod
     def load_box_on_face_check_box():
-        return st.sidebar.checkbox("draw box on face")
+        return st.sidebar.checkbox("Detect face")

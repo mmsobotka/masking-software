@@ -3,6 +3,9 @@ from EnumModeSelector import FaceDetectionMode
 
 
 class FaceRecognizer:
+    """
+    FaceRecognizer class is used for face recognition.
+    """
     @staticmethod
     def recognize_faces(unknown_image, model_image, mode):
         if mode == FaceDetectionMode.cnn:
@@ -13,9 +16,6 @@ class FaceRecognizer:
             return FaceRecognizer.face_recognition_function(
                 unknown_image, model_image, mode
             )
-        # TODO
-        # elif mode == ModeSelector.lbph_mode:
-        #     pass
 
     @staticmethod
     def face_recognition_function(unknown_image, model_image, mode):
@@ -26,13 +26,11 @@ class FaceRecognizer:
             model_person, model=mode
         )
         if len(encoding_model_person) == 0:
-            # st.sidebar.error("No face detected on image to learn recognition")
             return 0
         encoding_unknown_person = face_recognition.face_encodings(
             unknown_person, model=mode
         )
         if len(encoding_unknown_person) == 0:
-            # st.sidebar.error("No face detected on image to recognition")
             return 0
 
         recognized_distance = face_recognition.face_distance(

@@ -10,26 +10,17 @@ from Display import Display
 from EnumModeSelector import UploadMode
 from EnumModeSelector import MaskingOption
 from VideoHelper import VideoHelper
+import os
 import tempfile
 from mtcnn.mtcnn import MTCNN
 from MaskingModeHelper import MaskingModeHelper
 import dlib
 
 
-# TODO
-# restart button
-# rescaling of input images
-# size of rectangle under box and name text with face and text should be linked with size of face size
-# when few faces recognition return list of faces or find the most recognized one
-# when face in picture is too small then print warning to up
-# load another image ( check media pipe face sizes internal options)
-# check if hog and cnn recognition mode works correctly
-# p2 in cut face features user should chose what to cut
-# reload with change main mode
-# SAVE TO FILE P0 ASAP !!!!
-
-
 class Application:
+    """
+    Application class creates the main interface and is responsible for the program flow.
+    """
     image_loaded = None
     video_loaded = None
     camera_loaded = None
@@ -89,7 +80,6 @@ class Application:
             "Please select image to upload", type=["png", "jpg", "jpeg"], key="upload_1"
         )
         if image_loaded:
-            print("image loaded!")
             image = tempfile.NamedTemporaryFile(delete=False)
             image.write(image_loaded.read())
             self.image_loaded = image
@@ -119,12 +109,11 @@ class Application:
             self.image_learn_recognition_loaded = image
 
     def load_detection_mode(self):
-        (
-            (self.detection_mode),
-            (self.detection_mode_colors),
-            (self.detection_mode_sizes),
-            self.face_mesh_mode,
-        ) = ModeSelector.load_detection_mode()
+        ((self.detection_mode),
+         (self.detection_mode_colors),
+         (self.detection_mode_sizes),
+         self.face_mesh_mode,
+         ) = ModeSelector.load_detection_mode()
 
     def load_masking_mode(self):
         mask_mode, size = ModeSelector.load_mask_mode()
@@ -212,8 +201,8 @@ class Application:
         self.load_all_checkboxes()
         if self.is_face_detection_enabled:
             self.run_application(self.image_after_masking)
-
         Display.view_image(self.image_after_masking)
+        self.save_image(self.image_after_masking)
 
     def run_application_video(self):
         self.load_all_checkboxes()
@@ -229,15 +218,7 @@ class Application:
                 self.run_application(frame)
                 print(id(self.image_after_masking))
                 images_after_masking.append(self.image_after_masking)
-                del self.image_after_masking
                 gc.collect()
-
-            del frames
-            del self.faces
-            del self.detector
-
-            gc.collect()
-
             VideoHelper.save_video(images_after_masking)
             VideoHelper.display_video()
 
@@ -245,12 +226,31 @@ class Application:
         self.load_all_checkboxes()
         if self.is_face_detection_enabled and st.sidebar.button("play"):
             cam = cv2.VideoCapture(0)
-
             st_frame = st.empty()
+            index = 0
             while True:
                 ret, frame = cam.read()
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 self.run_application(frame)
                 gc.collect()
-
                 st_frame.image(self.image_after_masking, use_column_width=True)
+                self.save_camera(index, self.image_after_masking)
+                index = index+1
+
+    def save_image(self, images_after_masking):
+        try:
+            os.mkdir(".\\image")
+        except Exception:
+            print('something went wrong')
+        image_rgb = cv2.cvtColor(images_after_masking, cv2.COLOR_BGR2RGB)
+        cv2.imwrite("image\\img.jpg", image_rgb)
+
+    def save_camera(self, index, images_after_masking):
+        try:
+            os.mkdir(".\\camera")
+        except Exception:
+            print('something went wrong')
+        image_rgb = cv2.cvtColor(images_after_masking, cv2.COLOR_BGR2RGB)
+        cv2.imwrite(f"camera\\img_{str(index)}.jpg", image_rgb)
+
+

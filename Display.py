@@ -4,10 +4,15 @@ import streamlit as st
 import cv2
 import face_recognition
 import mediapipe as mp
+import dlib
 from FaceDetector import FaceDetector
 
 
 class Display:
+    """
+    Display class is responsible for displaying loaded images, video or camera view.
+    Displays images after applied modifications.
+    """
     @staticmethod
     def load_image_on_sidebar(img):
         image = Image.open(img)
@@ -15,7 +20,6 @@ class Display:
 
     @staticmethod
     def load_video(vid):
-        print("load Video!")
         video = cv2.VideoCapture(vid.name)
         frames = []
 
@@ -50,7 +54,6 @@ class Display:
 
     @staticmethod
     def get_color(key):
-        """TODO pass key to info"""
         color = st.sidebar.color_picker("Pick a color", "#FFFFFF", key=key)
         return ImageColor.getcolor(color, "RGB")
 
@@ -64,9 +67,6 @@ class Display:
         if use:
             if len(faces) > 0:
                 st.sidebar.success("Face was detected!")
-            else:
-                # st.sidebar.error("Face wasn't detected!")
-                pass
         for face in faces:
             x, y, width, height = face["box"]
             cv2.rectangle(image_to_draw_on, (x, y), (x + width, y + height), color, 2)
@@ -119,7 +119,6 @@ class Display:
     @staticmethod
     def draw_lines_on_faces(image_to_draw_on, color, size):
         face_landmarks_list = face_recognition.face_landmarks(image_to_draw_on)
-
         pil_image = Image.fromarray(image_to_draw_on)
         size = int(size)
         for face_landmarks in face_landmarks_list:
@@ -133,21 +132,16 @@ class Display:
             d.line(face_landmarks["right_eye"], fill=color, width=size)
             d.line(face_landmarks["top_lip"], fill=color, width=size)
             d.line(face_landmarks["bottom_lip"], fill=color, width=size)
-
         return np.array(pil_image)
 
     @staticmethod
     def draw_mesh_on_faces(image_to_draw_on, color, size, mesh_mode):
-        """TODO improve small faces on images"""
         mp_draw = mp.solutions.drawing_utils
         draw_spec = mp_draw.DrawingSpec(
             thickness=int(size), circle_radius=int(size), color=color
         )
         mp_face_mesh = mp.solutions.face_mesh
         face_mesh = mp_face_mesh.FaceMesh(max_num_faces=10)
-
-        # use masked image instead of original
-        # results = face_mesh.process(image_rgb)
         results = face_mesh.process(image_to_draw_on)
 
         if results.multi_face_landmarks:
@@ -158,21 +152,19 @@ class Display:
 
     @staticmethod
     def draw_face_features(
-        detection_mode,
-        image_to_draw_on,
-        faces=None,
-        detection_mode_colors=None,
-        detection_mode_sizes=None,
-        detection_mode_mesh=None,
-        landmark_detector=None
-    ):
+            detection_mode,
+            image_to_draw_on,
+            faces=None,
+            detection_mode_colors=None,
+            detection_mode_sizes=None,
+            detection_mode_mesh=None,
+            landmark_detector=None):
 
-        (
-            is_points_selected,
-            is_points_dlib_selected,
-            is_lines_selected,
-            is_mesh_selected,
-        ) = detection_mode
+        (is_points_selected,
+         is_points_dlib_selected,
+         is_lines_selected,
+         is_mesh_selected,
+         ) = detection_mode
         points_color, points_dlib_color, lines_color, mesh_color = detection_mode_colors
         points_size, points_dlib_size, lines_size, mesh_size = detection_mode_sizes
 
@@ -202,8 +194,7 @@ class Display:
 
     @staticmethod
     def write_person_name_on_face(
-        recognition_result, faces, image_after_masking, person_name
-    ):
+            recognition_result, faces, image_after_masking, person_name):
         if recognition_result is not None:
             name = "UNKNOWN"
             if recognition_result > 40:
