@@ -1,3 +1,5 @@
+https://github.com/mmsobotka/masking-software/assets/73854682/67ad32e3-092a-4f49-9495-769c756da546
+
 PyCharm 2021.2.3
 
 python-3.9.5
